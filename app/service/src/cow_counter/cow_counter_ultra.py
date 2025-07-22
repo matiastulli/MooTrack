@@ -122,9 +122,8 @@ def detect_cows_aggressive(image_path, output_dir="output"):
     # Create visualization
     visualize_results(image, final_detections, output_dir)
 
-    # Save comprehensive report
-    save_comprehensive_report(
-        image_path, all_detections, final_detections, output_dir)
+    save_detection_results(
+        image_path, final_detections, "ultra_aggressive_cow_detection", output_dir)
 
     return len(final_detections), final_detections
 
@@ -186,7 +185,7 @@ def detect_brown_spots(image):
     return detections
 
 
-def filter_detections(detections):
+def filter_detections(detections, iou_threshold=0.2):
     """
     Filter and clean up detections.
     """
@@ -196,28 +195,30 @@ def filter_detections(detections):
     # Sort by confidence
     detections.sort(key=lambda x: x['confidence'], reverse=True)
 
-    # Remove duplicates based on overlap
-    filtered = []
+    final_detections = []
+
     for detection in detections:
         bbox1 = detection['bbox']
         is_duplicate = False
 
-        for existing in filtered:
-            bbox2 = existing['bbox']
-            overlap = calculate_overlap(bbox1, bbox2)
+        for final_detection in final_detections:
+            bbox2 = final_detection['bbox']
+            iou = calculate_iou(bbox1, bbox2)
 
-            if overlap > 0.3:  # 30% overlap threshold
+            if iou > iou_threshold:
                 is_duplicate = True
                 break
 
         if not is_duplicate:
-            filtered.append(detection)
+            final_detections.append(detection)
 
-    return filtered
+    return final_detections
 
 
-def calculate_overlap(box1, box2):
-    """Calculate overlap ratio between two boxes."""
+def calculate_iou(box1, box2):
+    """
+    Calculate Intersection over Union (IoU) of two bounding boxes.
+    """
     x1_1, y1_1, x2_1, y2_1 = box1
     x1_2, y1_2, x2_2, y2_2 = box2
 
@@ -231,10 +232,13 @@ def calculate_overlap(box1, box2):
         return 0.0
 
     intersection = (x2_i - x1_i) * (y2_i - y1_i)
+
+    # Calculate union
     area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
     area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+    union = area1 + area2 - intersection
 
-    return intersection / min(area1, area2) if min(area1, area2) > 0 else 0.0
+    return intersection / union if union > 0 else 0.0
 
 
 def visualize_results(image, detections, output_dir):
@@ -310,56 +314,6 @@ def visualize_results(image, detections, output_dir):
     # Save the annotated image
     cv2.imwrite(os.path.join(
         output_dir, 'final_result_ultra.jpg'), result_image)
-
-
-def save_comprehensive_report(image_path, all_detections, final_detections, output_dir):
-    """Save a comprehensive report."""
-
-    report_file = os.path.join(output_dir, 'comprehensive_report_ultra.txt')
-
-    with open(report_file, 'w') as f:
-        f.write("🐄 COMPREHENSIVE COW DETECTION REPORT 🐄\n")
-        f.write("=" * 60 + "\n\n")
-
-        f.write(f"Image: {os.path.basename(image_path)}\n")
-        f.write(f"Total raw detections: {len(all_detections)}\n")
-        f.write(f"Final filtered detections: {len(final_detections)}\n\n")
-
-        if all_detections:
-            f.write("RAW DETECTION BREAKDOWN:\n")
-            f.write("-" * 30 + "\n")
-
-            # Group by class
-            class_counts = {}
-            for det in all_detections:
-                class_name = det['class_name']
-                class_counts[class_name] = class_counts.get(class_name, 0) + 1
-
-            for class_name, count in class_counts.items():
-                f.write(f"{class_name}: {count} detections\n")
-
-            f.write(
-                f"\nConfidence range: {min(d['confidence'] for d in all_detections):.3f} - {max(d['confidence'] for d in all_detections):.3f}\n")
-
-        if final_detections:
-            f.write(f"\nFINAL DETECTIONS:\n")
-            f.write("-" * 20 + "\n")
-
-            for i, det in enumerate(final_detections):
-                x1, y1, x2, y2 = det['bbox']
-                f.write(f"Detection {i+1}:\n")
-                f.write(f"  Class: {det['class_name']}\n")
-                f.write(f"  Confidence: {det['confidence']:.3f}\n")
-                f.write(f"  Position: ({x1}, {y1}) to ({x2}, {y2})\n")
-                f.write(f"  Size: {det['size']:.0f} pixels²\n")
-                f.write(f"  Model: {det['model']}\n\n")
-        else:
-            f.write(f"\n❌ NO FINAL DETECTIONS\n")
-            f.write("This could mean:\n")
-            f.write("- The cows are too small for general YOLO models\n")
-            f.write("- The aerial perspective is challenging\n")
-            f.write("- Need custom training data for this specific scenario\n")
-            f.write("- Manual annotation might be required\n")
 
 
 def save_detection_results(image_path: str, detections: List[Dict[str, Any]], best_model: str, output_dir: str = "output") -> str:

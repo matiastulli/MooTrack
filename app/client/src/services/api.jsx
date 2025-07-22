@@ -208,21 +208,13 @@ export const api = {
     detectFromFile: async (file, filename, detectionMethod = 'enhanced') => {
       const formData = new FormData();
       formData.append('file_content', file);
-      
-      return api.post('cow-counter/detect/file', formData, {
+
+      return await api.post('/cow-counter/detect/file', formData, {
         params: {
           filename: filename,
           detection_method: detectionMethod
         }
       });
-    },
-
-    listImages: async () => {
-      return api.get('cow-counter/images');
-    },
-
-    deleteImage: async (filename) => {
-      return api.delete(`cow-counter/images/${filename}`);
     }
   }
 };

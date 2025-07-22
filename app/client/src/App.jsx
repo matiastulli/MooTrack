@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom"
+import MainApp from "./components/MainApp"
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true)
@@ -28,12 +29,11 @@ export default function App() {
     )
   }
 
-  // Route between landing page and main app based on authentication
+  // Route between different app sections
   return (
     <Router>
-      {/* we are not to manage auth here, just redirect to mainapp for now */}
       <Routes>
-        <Route path="*" element={<Navigate to="/cow-detection" replace />} />
+        <Route path="/mainapp" element={<MainApp />} />
       </Routes>
     </Router>
   )

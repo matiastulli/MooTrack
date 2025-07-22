@@ -1,15 +1,10 @@
-import os
-import json
-import base64
 from pathlib import Path
 from typing import Dict, List, Optional
-import cv2
-import numpy as np
 from ultralytics import YOLO
 
 # Import configuration
 from ..config import (
-    YOLO_MODEL, DEFAULT_CONFIDENCE, COW_CLASS_ID
+    YOLO_MODEL, COW_CLASS_ID
 )
 
 # Import enhanced detection functions
@@ -68,8 +63,9 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
     Enhanced cow detection using multiple models and techniques.
     """
     try:
-        count, detections = enhanced_cow_detection(str(image_path), str(output_dir))
-        
+        count, detections = enhanced_cow_detection(
+            str(image_path), str(output_dir))
+
         # Convert detections to expected format
         formatted_detections = []
         for detection in detections:
@@ -82,7 +78,7 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
                 "model": detection.get('model', 'enhanced'),
                 "size": detection.get('size', 0)
             })
-        
+
         return {
             "total_cows": count,
             "detections": formatted_detections,
@@ -91,7 +87,7 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
             "message": f"Enhanced detection found {count} cows",
             "method": "enhanced"
         }
-        
+
     except Exception as e:
         return {
             "total_cows": 0,
@@ -102,13 +98,15 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
             "method": "enhanced"
         }
 
+
 def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
     """
     Ultra-aggressive cow detection with very low thresholds.
     """
     try:
-        count, detections = detect_cows_aggressive(str(image_path), str(output_dir))
-        
+        count, detections = detect_cows_aggressive(
+            str(image_path), str(output_dir))
+
         # Convert detections to expected format
         formatted_detections = []
         for detection in detections:
@@ -121,7 +119,7 @@ def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
                 "model": detection.get('model', 'ultra'),
                 "size": detection.get('size', 0)
             })
-        
+
         return {
             "total_cows": count,
             "detections": formatted_detections,
@@ -130,7 +128,7 @@ def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
             "message": f"Ultra-aggressive detection found {count} cows",
             "method": "ultra"
         }
-        
+
     except Exception as e:
         return {
             "total_cows": 0,

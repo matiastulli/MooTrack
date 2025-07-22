@@ -2,21 +2,19 @@
 FastAPI router for cow detection endpoints.
 """
 import json
-from pathlib import Path
-from typing import Dict, List, Optional
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from fastapi.responses import JSONResponse
 
 # Import schemas
 from .schema import (
-    DetectionResult, AnalysisResponse, HealthResponse,
+    AnalysisResponse,
     ImageListResponse, DeleteResponse
 )
 
 # Import services
 from .service import (
-    detect_cows_simple, detect_cows_enhanced, detect_cows_ultra_aggressive,
-    save_uploaded_file, list_image_files, delete_image_file, load_model, model
+    detect_cows_enhanced, detect_cows_ultra_aggressive,
+    save_uploaded_file, list_image_files, delete_image_file, load_model
 )
 
 # Import configuration
@@ -27,166 +25,49 @@ router = APIRouter()
 # Detection endpoints
 
 
-@router.get("/detect/file/{filename}", response_model=AnalysisResponse)
+@router.post("/detect/file", response_model=AnalysisResponse)
 async def detect_cows_from_file(
-    filename: str,
-    confidence: float = 0.3
+    filename: str = Query(...,
+                          description="Name of the image file to analyze"),
+    file_content: UploadFile = File(...),
+    detection_method: str = Query(
+        "enhanced", description="Detection method to use: enhanced, ultra")
 ):
     """
     Detect cows in an existing image file.
     """
-    file_path = IMAGES_DIR / filename
-
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Image file not found")
 
     try:
-        result = detect_cows_simple(file_path, confidence)
+        save_uploaded_file(file_content, filename, IMAGES_DIR)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"File upload failed: {str(e)}")
 
-        # Save results to JSON file
-        results_file = OUTPUT_DIR / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
+    try:
+        file_path = IMAGES_DIR / filename
 
-        return AnalysisResponse(**result)
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail="Image file not found")
+
+        if detection_method == "enhanced":
+            result = detect_cows_enhanced(file_path, OUTPUT_DIR)
+        elif detection_method == "ultra":
+            result = detect_cows_ultra_aggressive(file_path, OUTPUT_DIR)
+        else:
+            raise HTTPException(
+                status_code=400, detail="Invalid detection method specified")
+
+        return AnalysisResponse(
+            total_cows=result["total_cows"],
+            detections=result["detections"],
+            message=result["message"],
+            image_path=result["image_path"],
+            method=result["method"]
+        )
 
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Detection failed: {str(e)}")
-
-
-@router.post("/detect/enhanced", response_model=AnalysisResponse)
-async def detect_cows_enhanced_endpoint(
-    file: UploadFile = File(...),
-    confidence: float = 0.3
-):
-    """
-    Upload an image and detect cows using enhanced detection methods.
-    """
-    if not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="File must be an image")
-
-    # Save uploaded file
-    file_content = await file.read()
-    file_path = save_uploaded_file(file_content, file.filename, IMAGES_DIR)
-
-    # Create output directory for this image
-    image_output_dir = OUTPUT_DIR / file.filename.replace('.', '_')
-    image_output_dir.mkdir(exist_ok=True)
-
-    try:
-        # Run enhanced detection
-        result = detect_cows_enhanced(file_path, image_output_dir)
-
-        # Save results to JSON file
-        results_file = image_output_dir / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
-
-        return AnalysisResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Enhanced detection failed: {str(e)}")
-
-
-@router.post("/detect/ultra", response_model=AnalysisResponse)
-async def detect_cows_ultra_endpoint(
-    file: UploadFile = File(...),
-    confidence: float = 0.1
-):
-    """
-    Upload an image and detect cows using ultra-aggressive detection.
-    """
-    if not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="File must be an image")
-
-    # Save uploaded file
-    file_content = await file.read()
-    file_path = save_uploaded_file(file_content, file.filename, IMAGES_DIR)
-
-    # Create output directory for this image
-    image_output_dir = OUTPUT_DIR / file.filename.replace('.', '_')
-    image_output_dir.mkdir(exist_ok=True)
-
-    try:
-        # Run ultra-aggressive detection
-        result = detect_cows_ultra_aggressive(file_path, image_output_dir)
-
-        # Save results to JSON file
-        results_file = image_output_dir / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
-
-        return AnalysisResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Ultra detection failed: {str(e)}")
-
-
-@router.get("/detect/enhanced/{filename}", response_model=AnalysisResponse)
-async def detect_cows_enhanced_from_file(
-    filename: str,
-    confidence: float = 0.3
-):
-    """
-    Detect cows in an existing image file using enhanced methods.
-    """
-    file_path = IMAGES_DIR / filename
-
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Image file not found")
-
-    # Create output directory for this image
-    image_output_dir = OUTPUT_DIR / filename.replace('.', '_')
-    image_output_dir.mkdir(exist_ok=True)
-
-    try:
-        result = detect_cows_enhanced(file_path, image_output_dir)
-
-        # Save results to JSON file
-        results_file = image_output_dir / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
-
-        return AnalysisResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Enhanced detection failed: {str(e)}")
-
-
-@router.get("/detect/ultra/{filename}", response_model=AnalysisResponse)
-async def detect_cows_ultra_from_file(
-    filename: str,
-    confidence: float = 0.1
-):
-    """
-    Detect cows in an existing image file using ultra-aggressive methods.
-    """
-    file_path = IMAGES_DIR / filename
-
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Image file not found")
-
-    # Create output directory for this image
-    image_output_dir = OUTPUT_DIR / filename.replace('.', '_')
-    image_output_dir.mkdir(exist_ok=True)
-
-    try:
-        result = detect_cows_ultra_aggressive(file_path, image_output_dir)
-
-        # Save results to JSON file
-        results_file = image_output_dir / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
-
-        return AnalysisResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Ultra detection failed: {str(e)}")
 
 
 @router.get("/detect/compare/{filename}")
@@ -207,7 +88,8 @@ async def compare_detection_methods(filename: str):
         # Run all three methods
         simple_result = detect_cows_simple(file_path, 0.3)
         enhanced_result = detect_cows_enhanced(file_path, image_output_dir)
-        ultra_result = detect_cows_ultra_aggressive(file_path, image_output_dir)
+        ultra_result = detect_cows_ultra_aggressive(
+            file_path, image_output_dir)
 
         comparison = {
             "image_path": str(file_path),
@@ -253,29 +135,6 @@ async def compare_detection_methods(filename: str):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Comparison failed: {str(e)}")
-
-
-# Results endpoint
-
-
-@router.get("/results/{filename}")
-async def get_latest_results(filename: str):
-    """
-    Get the latest detection results.
-    """
-    results_file = OUTPUT_DIR / filename / "detection_results.json"
-
-    if not results_file.exists():
-        raise HTTPException(
-            status_code=404, detail="No detection results found")
-
-    try:
-        with open(results_file, "r") as f:
-            results = json.load(f)
-        return results
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error reading results: {str(e)}")
 
 
 # Image management endpoints

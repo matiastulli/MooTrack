@@ -11,8 +11,6 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copy your application code
-COPY app/service/alembic.ini /app/alembic.ini
-COPY app/service/migrations /app/migrations
 COPY app/service/src /app/src
 COPY app/service/entrypoint.sh /app/entrypoint.sh
 

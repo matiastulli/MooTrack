@@ -289,7 +289,7 @@ def create_detection_visualizations(image, detections, output_dir, fig, axes):
     plt.close()
     
     # Save annotated result image
-    cv2.imwrite(os.path.join(output_dir, 'annotated_result.jpg'), result_image)
+    cv2.imwrite(os.path.join(output_dir, 'annotated_result_enhanced.jpg'), result_image)
 
 def save_detection_results(image_path, detections, best_model, output_dir):
     """

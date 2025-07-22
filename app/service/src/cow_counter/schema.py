@@ -18,7 +18,7 @@ class AnalysisResponse(BaseModel):
     image_path: str
     analysis_complete: bool
     message: str
-    method: Optional[str] = "simple"
+    method: Optional[str] = "enhanced"
 
 class HealthResponse(BaseModel):
     status: str

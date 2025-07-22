@@ -30,6 +30,9 @@ export default function MainApp() {
         try {
             // Generate a filename if the file doesn't have one
             const filename = file.name || `upload_${Date.now()}.jpg`
+
+            console.log(`file: ${file}`)
+            console.log(`Uploading file: ${filename} with detection method: ${detectionMethod}`)
             
             // Use the new cow detection API
             const result = await api.cowDetection.detectFromFile(file, filename, detectionMethod)

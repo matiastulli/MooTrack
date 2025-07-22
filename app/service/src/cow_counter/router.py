@@ -64,8 +64,9 @@ async def detect_cows_from_file(
         return AnalysisResponse(
             total_cows=result["total_cows"],
             detections=result["detections"],
-            message=result["message"],
             image_path=result["image_path"],
+            analysis_complete=result["analysis_complete"],
+            message=result["message"],
             method=result["method"]
         )
 

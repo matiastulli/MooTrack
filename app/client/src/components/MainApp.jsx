@@ -17,8 +17,7 @@ export default function MainApp() {
 
     const tabs = [
         { id: 'upload', label: 'Upload & Detect', icon: '📤' },
-        { id: 'results', label: 'Detection Results', icon: '📊' },
-        { id: 'compare', label: 'Compare Methods', icon: '⚖️' }
+        { id: 'results', label: 'Detection Results', icon: '📊' }
     ]
 
     const handleFileUpload = async (file, detectionMethod = 'enhanced') => {
@@ -74,45 +73,6 @@ export default function MainApp() {
         // If we have a file, re-run detection with the new method
         if (uploadedFile && !uploadLoading) {
             handleFileUpload(uploadedFile, method)
-        }
-    }
-
-    const handleCompareDetectionMethods = async () => {
-        if (!uploadedFile) {
-            setUploadStatus({
-                type: 'error',
-                message: 'Please upload an image first to compare detection methods'
-            })
-            return
-        }
-
-        setUploadLoading(true)
-        setUploadStatus(null)
-
-        try {
-            const filename = uploadedFile.name || `upload_${Date.now()}.jpg`
-            const result = await api.cowDetection.compareDetectionMethods(filename)
-
-            if (result.error) {
-                setUploadStatus({
-                    type: 'error',
-                    message: `Comparison failed: ${result.error}`
-                })
-            } else {
-                setUploadStatus({
-                    type: 'success',
-                    message: 'Method comparison completed!'
-                })
-                setDetectionResults(result)
-                setActiveTab('results')
-            }
-        } catch (error) {
-            setUploadStatus({
-                type: 'error',
-                message: `Comparison failed: ${error.message}`
-            })
-        } finally {
-            setUploadLoading(false)
         }
     }
 
@@ -297,20 +257,6 @@ export default function MainApp() {
                                                 Ultra-Aggressive
                                             </div>
                                         </button>
-                                        <button
-                                            onClick={handleCompareDetectionMethods}
-                                            disabled={uploadLoading || !uploadedFile}
-                                            className={cn(
-                                                "p-3 rounded-lg border transition-all duration-200",
-                                                "border-border hover:border-primary/50 hover:bg-muted/50",
-                                                (uploadLoading || !uploadedFile) && 'opacity-50 cursor-not-allowed'
-                                            )}
-                                        >
-                                            <div className="flex items-center justify-center gap-2 text-sm font-medium">
-                                                <span>⚖️</span>
-                                                Compare Methods
-                                            </div>
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -475,132 +421,6 @@ export default function MainApp() {
                                 </div>
                             </Card>
                         )}
-                    </div>
-                )}
-
-                {activeTab === 'compare' && (
-                    <div className="space-y-6">
-                        <div className="text-center mb-8">
-                            <h2 className="text-2xl font-bold text-foreground mb-2">Compare Detection Methods</h2>
-                            <p className="text-muted-foreground">
-                                Compare the performance of different detection algorithms
-                            </p>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {/* Simple Detection */}
-                            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
-                                <div className="text-center space-y-4">
-                                    <div className="text-4xl">⚡</div>
-                                    <h3 className="text-lg font-semibold text-foreground">
-                                        Simple Detection
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Fast basic detection with standard YOLO parameters
-                                    </p>
-                                    <div className="space-y-2">
-                                        <Badge variant="outline" className="w-full py-2">
-                                            Speed: Very Fast
-                                        </Badge>
-                                        <Badge variant="outline" className="w-full py-2">
-                                            Accuracy: Good
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            {/* Enhanced Detection */}
-                            <Card className="p-6 border-primary shadow-lg">
-                                <div className="text-center space-y-4">
-                                    <div className="text-4xl">✨</div>
-                                    <h3 className="text-lg font-semibold text-primary">
-                                        Enhanced Detection
-                                    </h3>
-                                    <Badge variant="default" className="mb-2">Recommended</Badge>
-                                    <p className="text-sm text-muted-foreground">
-                                        Grid-based analysis with optimized confidence thresholds
-                                    </p>
-                                    <div className="space-y-2">
-                                        <Badge variant="default" className="w-full py-2">
-                                            Speed: Fast
-                                        </Badge>
-                                        <Badge variant="default" className="w-full py-2">
-                                            Accuracy: Excellent
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </Card>
-
-                            {/* Ultra-Aggressive Detection */}
-                            <Card className="p-6 hover:shadow-lg transition-shadow duration-200">
-                                <div className="text-center space-y-4">
-                                    <div className="text-4xl">🎯</div>
-                                    <h3 className="text-lg font-semibold text-foreground">
-                                        Ultra-Aggressive
-                                    </h3>
-                                    <p className="text-sm text-muted-foreground">
-                                        Multiple models with aggressive detection parameters
-                                    </p>
-                                    <div className="space-y-2">
-                                        <Badge variant="outline" className="w-full py-2">
-                                            Speed: Slower
-                                        </Badge>
-                                        <Badge variant="outline" className="w-full py-2">
-                                            Accuracy: Highest
-                                        </Badge>
-                                    </div>
-                                </div>
-                            </Card>
-                        </div>
-
-                        <Card className="p-8">
-                            <div className="text-center space-y-4">
-                                <div className="text-5xl">⚖️</div>
-                                <h3 className="text-xl font-semibold text-foreground">
-                                    Side-by-Side Comparison
-                                </h3>
-                                <p className="text-muted-foreground max-w-2xl mx-auto">
-                                    Upload an image to compare Enhanced and Ultra-Aggressive detection methods simultaneously and see detailed performance metrics for each approach.
-                                </p>
-                                <div className="pt-4 space-y-3">
-                                    {uploadedFile ? (
-                                        <div className="space-y-3">
-                                            <p className="text-sm text-muted-foreground">
-                                                Image loaded: <strong>{uploadedFile.name}</strong>
-                                            </p>
-                                            <Button 
-                                                variant="default" 
-                                                size="lg"
-                                                onClick={handleCompareDetectionMethods}
-                                                disabled={uploadLoading}
-                                                className="min-w-40"
-                                            >
-                                                {uploadLoading ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                        Comparing...
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <span className="mr-2">⚖️</span>
-                                                        Compare Methods
-                                                    </>
-                                                )}
-                                            </Button>
-                                        </div>
-                                    ) : (
-                                        <Button 
-                                            variant="outline" 
-                                            size="lg"
-                                            onClick={() => setActiveTab('upload')}
-                                        >
-                                            <span className="mr-2">📤</span>
-                                            Upload Image First
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
-                        </Card>
                     </div>
                 )}
             </main>

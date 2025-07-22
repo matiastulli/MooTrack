@@ -216,10 +216,6 @@ export const api = {
       });
     },
 
-    compareDetectionMethods: async (filename) => {
-      return api.get(`cow-counter/detect/compare/${filename}`);
-    },
-
     listImages: async () => {
       return api.get('cow-counter/images');
     },

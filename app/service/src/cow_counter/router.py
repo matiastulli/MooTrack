@@ -1,7 +1,6 @@
 """
 FastAPI router for cow detection endpoints.
 """
-import json
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 
 # Import schemas
@@ -44,9 +43,10 @@ async def detect_cows_from_file(
 
     try:
         file_path = IMAGES_DIR / filename
-        
+
         # Create output directory named after the filename without extension
-        filename_stem = filename.rsplit('.', 1)[0]  # Get filename without extension
+        # Get filename without extension
+        filename_stem = filename.rsplit('.', 1)[0]
         output_directory = OUTPUT_DIR / filename_stem
         output_directory.mkdir(exist_ok=True)  # Ensure the directory exists
 
@@ -73,66 +73,6 @@ async def detect_cows_from_file(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Detection failed: {str(e)}")
-
-
-@router.get("/detect/compare/{filename}")
-async def compare_detection_methods(filename: str):
-    """
-    Compare all three detection methods on the same image.
-    """
-    file_path = IMAGES_DIR / filename
-
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="Image file not found")
-
-    # Create output directory for this image
-    image_output_dir = OUTPUT_DIR / filename.replace('.', '_')
-    image_output_dir.mkdir(exist_ok=True)
-
-    try:
-        # Run all three methods
-        enhanced_result = detect_cows_enhanced(file_path, image_output_dir)
-        ultra_result = detect_cows_ultra_aggressive(
-            file_path, image_output_dir)
-
-        comparison = {
-            "image_path": str(file_path),
-            "methods": {
-                "enhanced": {
-                    "count": enhanced_result["total_cows"],
-                    "detections": enhanced_result["detections"],
-                    "message": enhanced_result["message"]
-                },
-                "ultra": {
-                    "count": ultra_result["total_cows"],
-                    "detections": ultra_result["detections"],
-                    "message": ultra_result["message"]
-                }
-            },
-            "summary": {
-                "best_method": max(
-                    [("enhanced", enhanced_result["total_cows"]),
-                     ("ultra", ultra_result["total_cows"])
-                    ],
-                    key=lambda x: x[1]
-                )[0],
-                "total_detections": {
-                    "enhanced": enhanced_result["total_cows"],
-                    "ultra": ultra_result["total_cows"]
-                }
-            }
-        }
-
-        # Save comparison results
-        comparison_file = image_output_dir / "method_comparison.json"
-        with open(comparison_file, "w") as f:
-            json.dump(comparison, f, indent=2)
-
-        return comparison
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Comparison failed: {str(e)}")
 
 
 # Image management endpoints

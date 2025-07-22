@@ -218,12 +218,19 @@ export default function MainApp() {
 
       {/* Main Content - Image-Centered Layout */}
       <main className="max-w-full mx-auto px-4 py-3">
-        <div className="flex gap-4 h-[calc(100vh-140px)]">
+        <div className={cn(
+          "flex gap-4 h-[calc(100vh-140px)]",
+          "relative"
+        )}>
           {/* Left Sidebar - Controls Column */}
           <div className={cn(
             "transition-all duration-300 ease-in-out",
-            isSidebarCollapsed ? "w-12" : "w-80",
-            "relative flex-shrink-0"
+            "absolute md:relative",
+            "z-40 h-full bg-background/95 backdrop-blur-sm",
+            isSidebarCollapsed ? 
+              "-translate-x-full md:translate-x-0 md:w-12" : 
+              "translate-x-0 w-[85vw] md:w-80",
+            "border-r border-border"
           )}>
             {/* Collapse Toggle Button */}
             <Button
@@ -231,9 +238,9 @@ export default function MainApp() {
               size="sm"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
-                "absolute -right-3 top-1/2 z-50 h-24 w-6 py-2 px-0 border shadow-md flex flex-col items-center justify-center gap-1",
+                "absolute -right-12 md:-right-3 top-1/2 z-50 h-24 w-6 py-2 px-0 border shadow-md flex flex-col items-center justify-center gap-1",
                 "bg-card hover:bg-muted transition-colors",
-                "rounded-full"
+                "rounded-r-full md:rounded-full"
               )}
             >
               <div className={cn(
@@ -246,6 +253,7 @@ export default function MainApp() {
             
             <div className={cn(
               "space-y-4 overflow-y-auto no-scrollbar h-full transition-all duration-300",
+              "p-4", // Add padding for better mobile spacing
               isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
             )}>
             {/* Upload Section */}
@@ -288,7 +296,8 @@ export default function MainApp() {
           {/* Right Area - Large Image Display */}
           <div className={cn(
             "flex-1 flex flex-col transition-all duration-300",
-            isSidebarCollapsed && "ml-2"
+            "w-full", // Ensure full width
+            isSidebarCollapsed ? "md:ml-2" : "md:ml-0" // Adjust margin only on desktop
           )}>
             <ImagePreview
               imagePreview={imagePreview}

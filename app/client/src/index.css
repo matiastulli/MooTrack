@@ -4,6 +4,7 @@
 
 /* Import mobile-specific styles */
 @import './styles/mobile.css';
+@import './styles/utilities.css';
 
 @layer base {
   /* Mobile-specific animations */

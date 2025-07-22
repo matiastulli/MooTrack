@@ -20,6 +20,7 @@ const getHeaders = (isFormData = false) => {
 };
 
 export const api = {
+
   get: async (endpoint) => {
     try {
       // Ensure endpoint starts with a slash if it doesn't already

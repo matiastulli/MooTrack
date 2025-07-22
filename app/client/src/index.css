@@ -2,11 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar hiding */
+/* Import mobile-specific styles */
+@import './styles/mobile.css';
+
+@layer base {
+  /* Mobile-specific animations */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Custom scrollbar hiding and mobile utilities */
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Safe area insets for mobile devices */
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-inset-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-area-inset-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Mobile-specific touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Mobile-specific scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: contain;
   }
 
   /* Hide scrollbar for IE, Edge and Firefox */

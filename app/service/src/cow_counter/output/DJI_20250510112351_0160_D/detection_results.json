@@ -6,7 +6,7 @@
     "image_height": 2268,
     "total_detections": 44,
     "best_performing_model": "YOLOv8 Medium (conf=0.1)",
-    "processed_at": "2025-07-22T16:52:38.563626",
+    "processed_at": "2025-07-22T21:55:18.526235",
     "detection_algorithm": "enhanced_cow_detection"
   },
   "analysis_response": {

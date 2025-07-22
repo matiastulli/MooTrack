@@ -12,6 +12,10 @@ from ..config import (
     YOLO_MODEL, DEFAULT_CONFIDENCE, COW_CLASS_ID
 )
 
+# Import enhanced detection functions
+from .cow_counter import enhanced_cow_detection
+from .cow_counter_ultra import detect_cows_aggressive
+
 # Global variable to store the YOLO model (loaded once)
 model: Optional[YOLO] = None
 
@@ -27,55 +31,6 @@ def load_model():
             print(f"❌ Error loading YOLO model: {e}")
             model = None
     return model
-
-
-def detect_cows_simple(image_path, confidence_threshold: float = DEFAULT_CONFIDENCE):
-    """
-    Simple cow detection using YOLO.
-    Returns detection results in a clean format.
-    """
-    if not load_model():
-        raise Exception("Model not available")
-
-    # Convert Path to string if needed
-    image_path_str = str(image_path)
-
-    # Load image
-    image = cv2.imread(image_path_str)
-    if image is None:
-        raise Exception("Could not load image")
-
-    # Run detection
-    results = model(image, conf=confidence_threshold, verbose=False)
-
-    detections = []
-    cow_count = 0
-
-    for r in results:
-        if r.boxes is not None:
-            for box in r.boxes:
-                class_id = int(box.cls[0])
-                confidence = float(box.conf[0])
-
-                # Only detect cows (class 21 in COCO dataset)
-                if class_id == COW_CLASS_ID:
-                    x1, y1, x2, y2 = box.xyxy[0].tolist()
-
-                    detections.append({
-                        "confidence": confidence,
-                        "bbox": [x1, y1, x2, y2],
-                        "class_name": "cow",
-                        "class_id": class_id
-                    })
-                    cow_count += 1
-
-    return {
-        "total_cows": cow_count,
-        "detections": detections,
-        "image_path": image_path_str,
-        "analysis_complete": True,
-        "message": f"Found {cow_count} cows with confidence >= {confidence_threshold}"
-    }
 
 
 def save_uploaded_file(file_content: bytes, filename: str, images_dir: Path) -> Path:
@@ -108,53 +63,144 @@ def delete_image_file(filename: str, images_dir: Path) -> bool:
     return False
 
 
-def save_detection_results_json(image_path, detections, output_dir="output"):
+def detect_cows_simple(image_path: Path, confidence: float = DEFAULT_CONFIDENCE) -> Dict:
     """
-    Save detection results as JSON for web interface.
+    Simple cow detection using YOLO model.
     """
-    # Convert image to base64 for web display
-    with open(image_path, "rb") as img_file:
-        img_base64 = base64.b64encode(img_file.read()).decode('utf-8')
+    global model
+    if model is None:
+        model = load_model()
+        if model is None:
+            return {
+                "total_cows": 0,
+                "detections": [],
+                "image_path": str(image_path),
+                "analysis_complete": False,
+                "message": "Failed to load YOLO model"
+            }
+    
+    try:
+        # Load image
+        image = cv2.imread(str(image_path))
+        if image is None:
+            return {
+                "total_cows": 0,
+                "detections": [],
+                "image_path": str(image_path),
+                "analysis_complete": False,
+                "message": "Failed to load image"
+            }
+        
+        # Run inference
+        results = model(image, conf=confidence, verbose=False)
+        
+        detections = []
+        for r in results:
+            if r.boxes is not None:
+                for box in r.boxes:
+                    class_id = int(box.cls[0])
+                    if class_id == COW_CLASS_ID:  # Only cow detections
+                        x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
+                        conf = float(box.conf[0])
+                        
+                        detections.append({
+                            "confidence": conf,
+                            "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                            "class_name": "cow",
+                            "class_id": class_id
+                        })
+        
+        return {
+            "total_cows": len(detections),
+            "detections": detections,
+            "image_path": str(image_path),
+            "analysis_complete": True,
+            "message": f"Successfully detected {len(detections)} cows"
+        }
+        
+    except Exception as e:
+        return {
+            "total_cows": 0,
+            "detections": [],
+            "image_path": str(image_path),
+            "analysis_complete": False,
+            "message": f"Detection failed: {str(e)}"
+        }
 
-    # Get actual image dimensions
-    import cv2
-    image = cv2.imread(image_path)
-    original_height, original_width = image.shape[:2]
+def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
+    """
+    Enhanced cow detection using multiple models and techniques.
+    """
+    try:
+        count, detections = enhanced_cow_detection(str(image_path), str(output_dir))
+        
+        # Convert detections to expected format
+        formatted_detections = []
+        for detection in detections:
+            x1, y1, x2, y2 = detection['bbox']
+            formatted_detections.append({
+                "confidence": detection['confidence'],
+                "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                "class_name": detection.get('class_name', 'cow'),
+                "class_id": detection.get('class_id', COW_CLASS_ID),
+                "model": detection.get('model', 'enhanced'),
+                "size": detection.get('size', 0)
+            })
+        
+        return {
+            "total_cows": count,
+            "detections": formatted_detections,
+            "image_path": str(image_path),
+            "analysis_complete": True,
+            "message": f"Enhanced detection found {count} cows",
+            "method": "enhanced"
+        }
+        
+    except Exception as e:
+        return {
+            "total_cows": 0,
+            "detections": [],
+            "image_path": str(image_path),
+            "analysis_complete": False,
+            "message": f"Enhanced detection failed: {str(e)}",
+            "method": "enhanced"
+        }
 
-    # Prepare data for JSON
-    results_data = {
-        "image_name": os.path.basename(image_path),
-        "image_base64": f"data:image/jpeg;base64,{img_base64}",
-        "image_width": original_width,
-        "image_height": original_height,
-        "total_detections": len(detections),
-        "detections": []
-    }
-
-    for i, detection in enumerate(detections):
-        x1, y1, x2, y2 = detection['bbox']
-        results_data["detections"].append({
-            "id": i,
-            "bbox": {
-                "x1": int(x1),
-                "y1": int(y1),
-                "x2": int(x2),
-                "y2": int(y2),
-                "width": int(x2 - x1),
-                "height": int(y2 - y1)
-            },
-            "confidence": float(detection['confidence']),
-            "class_name": detection.get('class_name', 'cow'),
-            "model": detection.get('model', 'yolo'),
-            "size": (x2 - x1) * (y2 - y1),
-            "is_cow": True,  # Default to true, user can unselect in web interface
-            "verified": False  # User hasn't verified yet
-        })
-
-    # Save JSON file
-    json_file = os.path.join(output_dir, "detection_results.json")
-    with open(json_file, 'w') as f:
-        json.dump(results_data, f, indent=2)
-
-    print(f"💾 Detection results saved to {json_file}")
-    return json_file
+def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
+    """
+    Ultra-aggressive cow detection with very low thresholds.
+    """
+    try:
+        count, detections = detect_cows_aggressive(str(image_path), str(output_dir))
+        
+        # Convert detections to expected format
+        formatted_detections = []
+        for detection in detections:
+            x1, y1, x2, y2 = detection['bbox']
+            formatted_detections.append({
+                "confidence": detection['confidence'],
+                "bbox": [float(x1), float(y1), float(x2), float(y2)],
+                "class_name": detection.get('class_name', 'cow'),
+                "class_id": detection.get('class_id', COW_CLASS_ID),
+                "model": detection.get('model', 'ultra'),
+                "size": detection.get('size', 0)
+            })
+        
+        return {
+            "total_cows": count,
+            "detections": formatted_detections,
+            "image_path": str(image_path),
+            "analysis_complete": True,
+            "message": f"Ultra-aggressive detection found {count} cows",
+            "method": "ultra"
+        }
+        
+    except Exception as e:
+        return {
+            "total_cows": 0,
+            "detections": [],
+            "image_path": str(image_path),
+            "analysis_complete": False,
+            "message": f"Ultra-aggressive detection failed: {str(e)}",
+            "method": "ultra"
+        }

@@ -198,78 +198,96 @@ export const api = {
     localStorage.removeItem('userId');
   },
 
-  // Cow Detection API methods
+  // Cow detection specific methods
   cowDetection: {
-    // Get API health status
-    getHealth: async () => {
-      return api.get('/health');
-    },
-
-    // Get API configuration
-    getConfig: async () => {
-      return api.get('/config');
-    },
-
-    // Upload image and detect cows
-    detectFromUpload: async (file, confidence = 0.3) => {
+    // Upload image and run simple detection
+    detectCows: async (file, confidence = 0.3) => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const headers = {};
-      const token = getToken();
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      const response = await fetch(`${API_BASE_URL}/detect?confidence=${confidence}`, {
+        method: 'POST',
+        headers: {
+          ...getHeaders(),
+          'Content-Type': undefined, // Let browser set content-type for FormData
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        return { error: error.detail || 'Detection failed' };
       }
+      
+      return response.json();
+    },
 
-      try {
-        const normalizedEndpoint = '/cow_counter/detect';
-        const url = `${API_BASE_URL}${normalizedEndpoint}?confidence=${confidence}`;
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: headers,
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          return { error: error.detail || 'Detection failed' };
-        }
-
-        return response.json();
-      } catch (error) {
-        console.error('Detection upload failed:', error);
-        return { error: error.message || 'Upload failed' };
+    // Enhanced detection
+    detectCowsEnhanced: async (file, confidence = 0.3) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE_URL}/detect/enhanced?confidence=${confidence}`, {
+        method: 'POST',
+        headers: {
+          ...getHeaders(),
+          'Content-Type': undefined,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        return { error: error.detail || 'Enhanced detection failed' };
       }
+      
+      return response.json();
     },
 
-    // Detect cows in existing file
-    detectFromFile: async (filename, confidence = 0.3) => {
-      return api.get(`/cow_counter/detect/file/${filename}?confidence=${confidence}`);
+    // Ultra-aggressive detection
+    detectCowsUltra: async (file, confidence = 0.1) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${API_BASE_URL}/detect/ultra?confidence=${confidence}`, {
+        method: 'POST',
+        headers: {
+          ...getHeaders(),
+          'Content-Type': undefined,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        return { error: error.detail || 'Ultra detection failed' };
+      }
+      
+      return response.json();
     },
 
-    // Get latest detection results
-    getResults: async () => {
-      return api.get('/cow_counter/results');
+    // Compare all detection methods
+    compareDetectionMethods: async (filename) => {
+      return api.get(`detect/compare/${filename}`);
     },
 
-    // List all available images
+    // List available images
     listImages: async () => {
-      return api.get('/cow_counter/images');
+      return api.get('images');
     },
 
     // Delete an image
     deleteImage: async (filename) => {
-      return api.delete(`/cow_counter/images/${filename}`);
+      return api.delete(`images/${filename}`);
+    },
+
+    // Run detection on existing image
+    detectFromFile: async (filename, method = 'simple', confidence = 0.3) => {
+      const endpoint = method === 'simple' 
+        ? `detect/file/${filename}?confidence=${confidence}`
+        : `detect/${method}/${filename}?confidence=${confidence}`;
+      
+      return api.get(endpoint);
     }
   },
-
-  // Legacy methods for backward compatibility
-  loadDetectionResults: async () => {
-    return api.cowDetection.getResults();
-  },
-
-  loadFromFile: async (file, confidence = 0.3) => {
-    return api.cowDetection.detectFromUpload(file, confidence);
-  }
 };

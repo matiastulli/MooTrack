@@ -9,6 +9,8 @@ class DetectionResult(BaseModel):
     bbox: List[float]  # [x1, y1, x2, y2]
     class_name: str
     class_id: int
+    model: Optional[str] = None
+    size: Optional[float] = None
 
 class AnalysisResponse(BaseModel):
     total_cows: int
@@ -16,6 +18,7 @@ class AnalysisResponse(BaseModel):
     image_path: str
     analysis_complete: bool
     message: str
+    method: Optional[str] = "simple"
 
 class HealthResponse(BaseModel):
     status: str

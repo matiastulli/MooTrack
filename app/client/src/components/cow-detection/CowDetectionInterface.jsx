@@ -1,258 +1,311 @@
-import { AlertCircle, Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { exportDetectionResults } from '../../lib/utils'
-import { api } from '../../services/api'
-import DetectionControls from './DetectionControls'
-import DetectionList from './DetectionList'
-import DetectionStats from './DetectionStats'
-import ImageViewer from './ImageViewer'
+import { useCallback, useState } from 'react';
+import { api } from '../../services/api';
+import { Button } from '../ui/Button';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/Card';
+import DetectionComparison from './DetectionComparison';
+import ImageUploader from './ImageUploader';
+import VerificationPanel from './VerificationPanel';
 
 const CowDetectionInterface = () => {
-  const [detectionData, setDetectionData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [apiHealth, setApiHealth] = useState(null)
+  const [activeTab, setActiveTab] = useState('upload');
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [detectionResults, setDetectionResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState('simple');
+  const [confidence, setConfidence] = useState(0.3);
+  const [verificationData, setVerificationData] = useState(null);
 
-  // Check API health
-  const checkApiHealth = async () => {
+  const handleImageUpload = useCallback(async (file) => {
+    setUploadedImage(file);
+    setDetectionResults(null);
+    setVerificationData(null);
+    setError(null);
+    setActiveTab('detection');
+  }, []);
+
+  const runDetection = async (method = selectedMethod) => {
+    if (!uploadedImage) return;
+
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const result = await api.cowDetection.getHealth()
-      if (result.error) {
-        setApiHealth({ status: 'error', message: result.error })
-      } else {
-        setApiHealth(result)
-      }
-    } catch (err) {
-      setApiHealth({ status: 'error', message: 'API connection failed' })
-    }
-  }
-
-  // Transform API response to frontend expected format
-  const transformApiResponse = (apiResponse) => {
-    if (!apiResponse || !apiResponse.detections) {
-      return null
-    }
-
-    // Create base64 image from path if needed
-    const imageName = apiResponse.image_path ? 
-      apiResponse.image_path.split('/').pop() || apiResponse.image_path.split('\\').pop() : 
-      'unknown.jpg'
-
-    return {
-      image_name: imageName,
-      image_base64: null, // Will be loaded separately if needed
-      image_width: 1920, // Default values, should be updated from actual image
-      image_height: 1080,
-      total_detections: apiResponse.total_cows || 0,
-      detections: apiResponse.detections.map((detection, index) => ({
-        id: index,
-        bbox: {
-          x1: Math.round(detection.bbox[0]),
-          y1: Math.round(detection.bbox[1]),
-          x2: Math.round(detection.bbox[2]),
-          y2: Math.round(detection.bbox[3]),
-          width: Math.round(detection.bbox[2] - detection.bbox[0]),
-          height: Math.round(detection.bbox[3] - detection.bbox[1])
-        },
-        confidence: detection.confidence,
-        class_name: detection.class_name || 'cow',
-        model: 'yolo',
-        size: (detection.bbox[2] - detection.bbox[0]) * (detection.bbox[3] - detection.bbox[1]),
-        is_cow: true, // Default to true, user can change
-        verified: false // User hasn't verified yet
-      }))
-    }
-  }
-
-  // Load detection results from server
-  const loadDetectionResults = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const result = await api.cowDetection.getResults()
+      let result;
       
-      if (result.error) {
-        throw new Error(result.error)
+      switch (method) {
+        case 'enhanced':
+          result = await api.cowDetection.detectCowsEnhanced(uploadedImage, confidence);
+          break;
+        case 'ultra':
+          result = await api.cowDetection.detectCowsUltra(uploadedImage, confidence);
+          break;
+        default:
+          result = await api.cowDetection.detectCows(uploadedImage, confidence);
       }
+
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+
+      setDetectionResults(result);
       
-      // Transform the API response to match the expected frontend format
-      const transformedData = transformApiResponse(result)
-      setDetectionData(transformedData)
+      // Initialize verification data
+      const verificationData = {
+        image_name: uploadedImage.name,
+        total_detections: result.total_cows,
+        detections: result.detections.map((detection, index) => ({
+          id: index,
+          ...detection,
+          is_cow: true, // Default to true, user can change
+          verified: false,
+          user_notes: ''
+        })),
+        method_used: method,
+        confidence_threshold: confidence,
+        verification_complete: false
+      };
+      
+      setVerificationData(verificationData);
+      setActiveTab('verification');
+      
     } catch (err) {
-      setError(err.message)
+      setError(`Detection failed: ${err.message}`);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  // Handle file upload
-  const handleFileUpload = async (file, transformedData = null) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      // If transformedData is provided (from server detection), use it directly
-      if (transformedData) {
-        setDetectionData(transformedData)
-        return
-      }
-      
-      // Otherwise, upload file and get detection results
-      const result = await api.cowDetection.detectFromUpload(file, 0.3)
-      
-      if (result.error) {
-        throw new Error(result.error)
-      }
-      
-      // Transform the API response to match the expected frontend format
-      const transformedResult = transformApiResponse(result)
-      setDetectionData(transformedResult)
-    } catch (err) {
-      setError(err.message)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const handleVerificationUpdate = useCallback((updatedVerificationData) => {
+    setVerificationData(updatedVerificationData);
+  }, []);
 
-  // Toggle detection status
-  const toggleDetection = (index) => {
-    if (!detectionData) return
-
-    const newData = { ...detectionData }
-    newData.detections[index].is_cow = !newData.detections[index].is_cow
-    newData.detections[index].verified = true
-    setDetectionData(newData)
-  }
-
-  // Confirm all detections as cows
-  const confirmAllAsCows = () => {
-    if (!detectionData) return
-
-    const newData = { ...detectionData }
-    newData.detections.forEach(detection => {
-      detection.is_cow = true
-      detection.verified = true
-    })
-    setDetectionData(newData)
-  }
-
-  // Reject all detections
-  const rejectAllDetections = () => {
-    if (!detectionData) return
-
-    const newData = { ...detectionData }
-    newData.detections.forEach(detection => {
-      detection.is_cow = false
-      detection.verified = true
-    })
-    setDetectionData(newData)
-  }
-
-  // Export results
-  const handleExport = () => {
-    if (!detectionData) return
-    exportDetectionResults(detectionData)
-  }
-
-  // Load results on mount
-  useEffect(() => {
-    checkApiHealth()
-    loadDetectionResults()
-  }, [])
-
-  // Loading state
-  if (isLoading && !detectionData) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-4">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-          </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            Loading detection results...
-          </h3>
-          <p className="text-muted-foreground">
-            Please wait while we fetch the cow detection data.
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  // Error state
-  if (error && !detectionData) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
-            <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
-            <h3 className="text-lg font-semibold text-destructive mb-2">
-              Connection Error
-            </h3>
-            <p className="text-destructive/80 mb-4">
-              {error}
-            </p>
-            {apiHealth && (
-              <div className="text-sm text-muted-foreground mb-4">
-                API Status: {apiHealth.status === 'healthy' ? '✅ Connected' : '❌ Not Available'}
-              </div>
-            )}
-            <div className="space-y-2">
-              <p className="text-xs text-destructive/60">
-                Make sure the MooTrack API server is running on the configured port.
-              </p>
-              <button
-                onClick={() => {
-                  checkApiHealth()
-                  loadDetectionResults()
-                }}
-                className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const resetInterface = () => {
+    setUploadedImage(null);
+    setDetectionResults(null);
+    setVerificationData(null);
+    setError(null);
+    setActiveTab('upload');
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-6">
-        {/* Header with stats */}
-        <DetectionStats detectionData={detectionData} />
-
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          {/* Image viewer - takes up most space */}
-          <div className="xl:col-span-3">
-            <ImageViewer
-              detectionData={detectionData}
-              onDetectionClick={toggleDetection}
-            />
-          </div>
-
-          {/* Controls sidebar */}
-          <div className="space-y-6">
-            <DetectionControls
-              onLoadResults={loadDetectionResults}
-              onFileUpload={handleFileUpload}
-              onConfirmAll={confirmAllAsCows}
-              onRejectAll={rejectAllDetections}
-              onExport={handleExport}
-              isLoading={isLoading}
-            />
-
-            <DetectionList
-              detectionData={detectionData}
-              onDetectionClick={toggleDetection}
-            />
-          </div>
-        </div>
+    <div className="container mx-auto p-6 max-w-7xl">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-foreground mb-2">
+          🐄 MooTrack - Cow Detection System
+        </h1>
+        <p className="text-muted-foreground text-lg">
+          Upload aerial images to automatically detect and count cows using AI
+        </p>
       </div>
-    </div>
-  )
-}
 
-export default CowDetectionInterface
+      {/* Tab Navigation */}
+      <div className="flex space-x-4 mb-6 border-b border-border">
+        {[
+          { id: 'upload', label: 'Upload Image', icon: '📁' },
+          { id: 'detection', label: 'Detection Settings', icon: '🔍' },
+          { id: 'verification', label: 'Verify Results', icon: '✅' },
+          { id: 'comparison', label: 'Compare Methods', icon: '📊' }
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center space-x-2 px-4 py-2 border-b-2 transition-colors ${
+              activeTab === tab.id
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <span>{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Error Display */}
+      {error && (
+        <Card className="mb-6 border-destructive">
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2 text-destructive">
+              <span>❌</span>
+              <span>{error}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab Content */}
+      <div className="space-y-6">
+        {activeTab === 'upload' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload Aerial Image</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ImageUploader onImageUpload={handleImageUpload} />
+              
+              {uploadedImage && (
+                <div className="mt-6 p-4 bg-muted rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Image uploaded successfully!</p>
+                      <p className="text-sm text-muted-foreground">
+                        File: {uploadedImage.name} ({(uploadedImage.size / 1024 / 1024).toFixed(2)} MB)
+                      </p>
+                    </div>
+                    <Button onClick={() => setActiveTab('detection')}>
+                      Next: Configure Detection →
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {activeTab === 'detection' && uploadedImage && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Detection Configuration</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Method Selection */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Detection Method</label>
+                  <div className="grid grid-cols-1 gap-3">
+                    {[
+                      { 
+                        id: 'simple', 
+                        name: 'Simple Detection', 
+                        description: 'Fast, standard YOLO detection',
+                        confidence: 0.3 
+                      },
+                      { 
+                        id: 'enhanced', 
+                        name: 'Enhanced Detection', 
+                        description: 'Multiple models with grid analysis',
+                        confidence: 0.2 
+                      },
+                      { 
+                        id: 'ultra', 
+                        name: 'Ultra-Aggressive', 
+                        description: 'Very low thresholds + color detection',
+                        confidence: 0.1 
+                      }
+                    ].map((method) => (
+                      <div
+                        key={method.id}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                          selectedMethod === method.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                        onClick={() => {
+                          setSelectedMethod(method.id);
+                          setConfidence(method.confidence);
+                        }}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <input
+                            type="radio"
+                            checked={selectedMethod === method.id}
+                            onChange={() => {}}
+                            className="text-primary"
+                          />
+                          <div>
+                            <p className="font-medium">{method.name}</p>
+                            <p className="text-sm text-muted-foreground">{method.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Confidence Threshold */}
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Confidence Threshold: {confidence}
+                  </label>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="0.9"
+                    step="0.1"
+                    value={confidence}
+                    onChange={(e) => setConfidence(parseFloat(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>More detections</span>
+                    <span>Higher precision</span>
+                  </div>
+                </div>
+
+                {/* Run Detection Button */}
+                <Button
+                  onClick={() => runDetection()}
+                  disabled={isLoading}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Running {selectedMethod} detection...
+                    </>
+                  ) : (
+                    <>
+                      🔍 Run {selectedMethod} Detection
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Image Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Image Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-video bg-muted rounded-lg flex items-center justify-center overflow-hidden">
+                  <img
+                    src={URL.createObjectURL(uploadedImage)}
+                    alt="Uploaded image"
+                    className="max-w-full max-h-full object-contain"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {activeTab === 'verification' && verificationData && (
+          <VerificationPanel
+            verificationData={verificationData}
+            onUpdate={handleVerificationUpdate}
+            uploadedImage={uploadedImage}
+          />
+        )}
+
+        {activeTab === 'comparison' && uploadedImage && (
+          <DetectionComparison uploadedImage={uploadedImage} />
+        )}
+      </div>
+
+      {/* Reset Button */}
+      {(uploadedImage || detectionResults) && (
+        <div className="mt-8 flex justify-center">
+          <Button variant="outline" onClick={resetInterface}>
+            🔄 Start Over
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CowDetectionInterface;

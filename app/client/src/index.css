@@ -7,7 +7,7 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* HSL Color System */
+  /* HSL Color System - Enhanced for better readability */
   --background: 0 0% 98%;
   --foreground: 210 11% 15%;
   --card: 0 0% 100%;
@@ -27,22 +27,26 @@
   --border: 210 11% 90%;
   --input: 210 11% 90%;
   --ring: 197 100% 47%;
-  --radius: 0.5rem;
-  
-  /* Cow Detection Specific Colors */
+  --radius: 0.75rem;
+
+  /* Cow Detection Specific Colors - Enhanced */
   --cow-confirmed: 134 61% 41%;
   --cow-rejected: 0 84% 60%;
   --cow-pending: 45 93% 47%;
   --confidence-high: 134 61% 41%;
   --confidence-medium: 45 93% 47%;
   --confidence-low: 0 84% 60%;
-  
+
   /* Chart Colors */
   --chart-1: 197 100% 47%;
   --chart-2: 134 61% 41%;
   --chart-3: 45 93% 47%;
   --chart-4: 280 65% 60%;
   --chart-5: 20 80% 55%;
+
+  /* Enhanced spacing for 40+ users */
+  --spacing-comfortable: 1.5rem;
+  --text-readable: 1.125rem;
 }
 
 .dark {
@@ -65,7 +69,7 @@
   --border: 210 11% 15%;
   --input: 210 11% 15%;
   --ring: 197 100% 47%;
-  
+
   /* Dark mode cow detection colors */
   --cow-confirmed: 134 55% 55%;
   --cow-rejected: 0 62% 50%;
@@ -79,6 +83,7 @@
   * {
     border-color: hsl(var(--border));
   }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -88,5 +93,101 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: var(--text-readable);
   }
+
+  /* Enhanced button styles for better accessibility */
+  button {
+    min-height: 44px; /* Minimum touch target size */
+    font-weight: 600;
+  }
+
+  /* Improved focus styles */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Custom utility classes for mature users */
+@layer utilities {
+  .text-comfortable {
+    font-size: var(--text-readable);
+    line-height: 1.6;
+  }
+
+  .spacing-comfortable {
+    padding: var(--spacing-comfortable);
+  }
+
+  .shadow-comfortable {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .border-comfortable {
+    border-width: 2px;
+  }
+
+  /* Cow detection status colors */
+  .bg-cow-confirmed {
+    background-color: hsl(var(--cow-confirmed));
+  }
+
+  .bg-cow-rejected {
+    background-color: hsl(var(--cow-rejected));
+  }
+
+  .bg-cow-pending {
+    background-color: hsl(var(--cow-pending));
+  }
+
+  .text-cow-confirmed {
+    color: hsl(var(--cow-confirmed));
+  }
+
+  .text-cow-rejected {
+    color: hsl(var(--cow-rejected));
+  }
+
+  .text-cow-pending {
+    color: hsl(var(--cow-pending));
+  }
+
+  .border-cow-confirmed {
+    border-color: hsl(var(--cow-confirmed));
+  }
+
+  .border-cow-rejected {
+    border-color: hsl(var(--cow-rejected));
+  }
+
+  .border-cow-pending {
+    border-color: hsl(var(--cow-pending));
+  }
+}
+
+/* Animation improvements for better UX */
+@keyframes gentle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Loading spinner with better visibility */
+@keyframes comfortable-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-comfortable-spin {
+  animation: comfortable-spin 1s linear infinite;
 }

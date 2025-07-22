@@ -1,7 +1,7 @@
 {
-  "name": "MYNAB - Budget Tracker",
-  "short_name": "MYNAB",
-  "description": "Track your personal finances and budget with MYNAB",
+  "name": "MooTrack",
+  "short_name": "MooTrack",
+  "description": "MooTrack",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121418",

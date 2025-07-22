@@ -3,7 +3,6 @@ FastAPI router for cow detection endpoints.
 """
 import json
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
-from fastapi.responses import JSONResponse
 
 # Import schemas
 from .schema import (
@@ -45,14 +44,19 @@ async def detect_cows_from_file(
 
     try:
         file_path = IMAGES_DIR / filename
+        
+        # Create output directory named after the filename without extension
+        filename_stem = filename.rsplit('.', 1)[0]  # Get filename without extension
+        output_directory = OUTPUT_DIR / filename_stem
+        output_directory.mkdir(exist_ok=True)  # Ensure the directory exists
 
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="Image file not found")
 
         if detection_method == "enhanced":
-            result = detect_cows_enhanced(file_path, OUTPUT_DIR)
+            result = detect_cows_enhanced(file_path, output_directory)
         elif detection_method == "ultra":
-            result = detect_cows_ultra_aggressive(file_path, OUTPUT_DIR)
+            result = detect_cows_ultra_aggressive(file_path, output_directory)
         else:
             raise HTTPException(
                 status_code=400, detail="Invalid detection method specified")
@@ -86,7 +90,6 @@ async def compare_detection_methods(filename: str):
 
     try:
         # Run all three methods
-        simple_result = detect_cows_simple(file_path, 0.3)
         enhanced_result = detect_cows_enhanced(file_path, image_output_dir)
         ultra_result = detect_cows_ultra_aggressive(
             file_path, image_output_dir)
@@ -94,11 +97,6 @@ async def compare_detection_methods(filename: str):
         comparison = {
             "image_path": str(file_path),
             "methods": {
-                "simple": {
-                    "count": simple_result["total_cows"],
-                    "detections": simple_result["detections"],
-                    "message": simple_result["message"]
-                },
                 "enhanced": {
                     "count": enhanced_result["total_cows"],
                     "detections": enhanced_result["detections"],
@@ -112,13 +110,12 @@ async def compare_detection_methods(filename: str):
             },
             "summary": {
                 "best_method": max(
-                    [("simple", simple_result["total_cows"]),
-                     ("enhanced", enhanced_result["total_cows"]),
-                     ("ultra", ultra_result["total_cows"])],
+                    [("enhanced", enhanced_result["total_cows"]),
+                     ("ultra", ultra_result["total_cows"])
+                    ],
                     key=lambda x: x[1]
                 )[0],
                 "total_detections": {
-                    "simple": simple_result["total_cows"],
                     "enhanced": enhanced_result["total_cows"],
                     "ultra": ultra_result["total_cows"]
                 }

@@ -28,36 +28,6 @@ def load_model():
     return model
 
 
-def save_uploaded_file(file_content: bytes, filename: str, images_dir: Path) -> Path:
-    """Save uploaded file to images directory"""
-    file_path = images_dir / filename
-    with open(file_path, "wb") as buffer:
-        buffer.write(file_content)
-    return file_path
-
-
-def list_image_files(images_dir: Path) -> List[Dict]:
-    """List all available image files"""
-    images = []
-    for file_path in images_dir.glob("*"):
-        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png']:
-            images.append({
-                "filename": file_path.name,
-                "size": file_path.stat().st_size,
-                "url": f"/images/{file_path.name}"
-            })
-    return images
-
-
-def delete_image_file(filename: str, images_dir: Path) -> bool:
-    """Delete an image file"""
-    file_path = images_dir / filename
-    if file_path.exists():
-        file_path.unlink()
-        return True
-    return False
-
-
 def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
     """
     Enhanced cow detection using multiple models and techniques.
@@ -138,3 +108,33 @@ def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
             "message": f"Ultra-aggressive detection failed: {str(e)}",
             "method": "ultra"
         }
+
+
+def save_uploaded_file(file_content: bytes, filename: str, images_dir: Path) -> Path:
+    """Save uploaded file to images directory"""
+    file_path = images_dir / filename
+    with open(file_path, "wb") as buffer:
+        buffer.write(file_content)
+    return file_path
+
+
+def list_image_files(images_dir: Path) -> List[Dict]:
+    """List all available image files"""
+    images = []
+    for file_path in images_dir.glob("*"):
+        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png']:
+            images.append({
+                "filename": file_path.name,
+                "size": file_path.stat().st_size,
+                "url": f"/images/{file_path.name}"
+            })
+    return images
+
+
+def delete_image_file(filename: str, images_dir: Path) -> bool:
+    """Delete an image file"""
+    file_path = images_dir / filename
+    if file_path.exists():
+        file_path.unlink()
+        return True
+    return False

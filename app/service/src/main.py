@@ -3,14 +3,9 @@
 Simple FastAPI server for cow detection service.
 KISS principle - no database, minimal dependencies, clean API.
 """
-import os
-import json
-from pathlib import Path
-from typing import Dict, List, Optional
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
 
 # Import configuration
 from src.config import (
@@ -53,15 +48,19 @@ if OUTPUT_DIR.exists():
 app.include_router(cow_router, prefix="/cow_counter")
 
 # Legacy endpoints for backward compatibility
+
+
 @app.get("/")
 async def root():
     """Legacy root endpoint - redirects to new API"""
     return {"message": "MooTrack API is running", "api_docs": "/docs", "api_v1": "/api/v1/"}
 
+
 @app.get("/health")
 async def health():
     """Legacy health endpoint"""
     return {"status": "healthy", "message": "API is running"}
+
 
 @app.get("/config")
 async def get_config():
@@ -69,6 +68,8 @@ async def get_config():
     return get_config_summary()
 
 # Startup event
+
+
 @app.on_event("startup")
 async def startup_event():
     """Load model on startup"""

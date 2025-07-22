@@ -16,11 +16,14 @@ const DetectionComparison = ({ uploadedImage }) => {
     setError(null);
 
     try {
-      // First upload the image and get results from each method
+      const formData = new FormData();
+      formData.append('file', uploadedImage);
+
+      // Run all three detection methods
       const [simpleResult, enhancedResult, ultraResult] = await Promise.all([
-        api.cowDetection.detectCows(uploadedImage, 0.3),
-        api.cowDetection.detectCowsEnhanced(uploadedImage, 0.2),
-        api.cowDetection.detectCowsUltra(uploadedImage, 0.1)
+        api.post('cow_counter/detect?confidence=0.3', formData),
+        api.post('cow_counter/detect/enhanced?confidence=0.2', formData),
+        api.post('cow_counter/detect/ultra?confidence=0.1', formData)
       ]);
 
       if (simpleResult.error || enhancedResult.error || ultraResult.error) {

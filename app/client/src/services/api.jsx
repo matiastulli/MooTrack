@@ -4,10 +4,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const getToken = () => localStorage.getItem('token');
 
 // Common headers with authentication
-const getHeaders = () => {
-  const headers = {
-    'Content-Type': 'application/json'
-  };
+const getHeaders = (isFormData = false) => {
+  const headers = {};
+  
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
   
   const token = getToken();
   if (token) {
@@ -20,7 +22,6 @@ const getHeaders = () => {
 export const api = {
   get: async (endpoint) => {
     try {
-
       // Ensure endpoint starts with a slash if it doesn't already
       const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
       
@@ -62,11 +63,14 @@ export const api = {
         });
         url += `?${searchParams.toString()}`;
       }
+
+      // Handle FormData vs JSON
+      const isFormData = data instanceof FormData;
       
       const response = await fetch(url, {
         method: 'POST',
-        headers: getHeaders(),
-        body: data ? JSON.stringify(data) : undefined,
+        headers: getHeaders(isFormData),
+        body: isFormData ? data : (data ? JSON.stringify(data) : undefined),
       });
       
       if (!response.ok) {
@@ -196,98 +200,5 @@ export const api = {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
-  },
-
-  // Cow detection specific methods
-  cowDetection: {
-    // Upload image and run simple detection
-    detectCows: async (file, confidence = 0.3) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch(`${API_BASE_URL}/detect?confidence=${confidence}`, {
-        method: 'POST',
-        headers: {
-          ...getHeaders(),
-          'Content-Type': undefined, // Let browser set content-type for FormData
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        return { error: error.detail || 'Detection failed' };
-      }
-      
-      return response.json();
-    },
-
-    // Enhanced detection
-    detectCowsEnhanced: async (file, confidence = 0.3) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch(`${API_BASE_URL}/detect/enhanced?confidence=${confidence}`, {
-        method: 'POST',
-        headers: {
-          ...getHeaders(),
-          'Content-Type': undefined,
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        return { error: error.detail || 'Enhanced detection failed' };
-      }
-      
-      return response.json();
-    },
-
-    // Ultra-aggressive detection
-    detectCowsUltra: async (file, confidence = 0.1) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch(`${API_BASE_URL}/detect/ultra?confidence=${confidence}`, {
-        method: 'POST',
-        headers: {
-          ...getHeaders(),
-          'Content-Type': undefined,
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        const error = await response.json();
-        return { error: error.detail || 'Ultra detection failed' };
-      }
-      
-      return response.json();
-    },
-
-    // Compare all detection methods
-    compareDetectionMethods: async (filename) => {
-      return api.get(`detect/compare/${filename}`);
-    },
-
-    // List available images
-    listImages: async () => {
-      return api.get('images');
-    },
-
-    // Delete an image
-    deleteImage: async (filename) => {
-      return api.delete(`images/${filename}`);
-    },
-
-    // Run detection on existing image
-    detectFromFile: async (filename, method = 'simple', confidence = 0.3) => {
-      const endpoint = method === 'simple' 
-        ? `detect/file/${filename}?confidence=${confidence}`
-        : `detect/${method}/${filename}?confidence=${confidence}`;
-      
-      return api.get(endpoint);
-    }
   },
 };

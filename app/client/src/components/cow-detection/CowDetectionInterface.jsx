@@ -32,16 +32,18 @@ const CowDetectionInterface = () => {
 
     try {
       let result;
+      const formData = new FormData();
+      formData.append('file', uploadedImage);
       
       switch (method) {
         case 'enhanced':
-          result = await api.cowDetection.detectCowsEnhanced(uploadedImage, confidence);
+          result = await api.post(`cow_counter/detect/enhanced?confidence=${confidence}`, formData);
           break;
         case 'ultra':
-          result = await api.cowDetection.detectCowsUltra(uploadedImage, confidence);
+          result = await api.post(`cow_counter/detect/ultra?confidence=${confidence}`, formData);
           break;
         default:
-          result = await api.cowDetection.detectCows(uploadedImage, confidence);
+          result = await api.post(`cow_counter/detect?confidence=${confidence}`, formData);
       }
 
       if (result.error) {

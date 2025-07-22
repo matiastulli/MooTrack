@@ -27,37 +27,6 @@ router = APIRouter()
 # Detection endpoints
 
 
-@router.post("/detect", response_model=AnalysisResponse)
-async def detect_cows(
-    file: UploadFile = File(...),
-    confidence: float = 0.3
-):
-    """
-    Upload an image and detect cows in it.
-    """
-    if not file.content_type.startswith('image/'):
-        raise HTTPException(status_code=400, detail="File must be an image")
-
-    # Save uploaded file
-    file_content = await file.read()
-    file_path = save_uploaded_file(file_content, file.filename, IMAGES_DIR)
-
-    try:
-        # Run detection
-        result = detect_cows_simple(file_path, confidence)
-
-        # Save results to JSON file
-        results_file = OUTPUT_DIR / "detection_results.json"
-        with open(results_file, "w") as f:
-            json.dump(result, f, indent=2)
-
-        return AnalysisResponse(**result)
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Detection failed: {str(e)}")
-
-
 @router.get("/detect/file/{filename}", response_model=AnalysisResponse)
 async def detect_cows_from_file(
     filename: str,

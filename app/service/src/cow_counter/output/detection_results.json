@@ -1,7 +1,0 @@
-{
-  "total_cows": 0,
-  "detections": [],
-  "image_path": "C:\\code\\MooTrack\\app\\service\\src\\cow_counter\\images\\DJI_20250510112351_0160_D.JPG",
-  "analysis_complete": true,
-  "message": "Found 0 cows with confidence >= 0.3"
-}

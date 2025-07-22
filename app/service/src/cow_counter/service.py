@@ -1,6 +1,7 @@
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 from ultralytics import YOLO
+from fastapi import UploadFile
 
 # Import configuration
 from ..config import (
@@ -28,7 +29,7 @@ def load_model():
     return model
 
 
-def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
+def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict[str, Any]:
     """
     Enhanced cow detection using multiple models and techniques.
     """
@@ -69,7 +70,7 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict:
         }
 
 
-def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
+def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict[str, Any]:
     """
     Ultra-aggressive cow detection with very low thresholds.
     """
@@ -110,15 +111,19 @@ def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict:
         }
 
 
-def save_uploaded_file(file_content: bytes, filename: str, images_dir: Path) -> Path:
+def save_uploaded_file(file_content: UploadFile, filename: str, images_dir: Path) -> Path:
     """Save uploaded file to images directory"""
     file_path = images_dir / filename
     with open(file_path, "wb") as buffer:
-        buffer.write(file_content)
+        # Read the content from UploadFile object
+        content = file_content.file.read()
+        buffer.write(content)
+        # Reset file pointer for potential future reads
+        file_content.file.seek(0)
     return file_path
 
 
-def list_image_files(images_dir: Path) -> List[Dict]:
+def list_image_files(images_dir: Path) -> List[Dict[str, Any]]:
     """List all available image files"""
     images = []
     for file_path in images_dir.glob("*"):

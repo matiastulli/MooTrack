@@ -12,6 +12,8 @@ export default function MainApp() {
     const [uploadStatus, setUploadStatus] = useState(null)
     const [uploadLoading, setUploadLoading] = useState(false)
     const [detectionResults, setDetectionResults] = useState(null)
+    const [selectedDetectionMethod, setSelectedDetectionMethod] = useState('enhanced')
+    const [uploadedFile, setUploadedFile] = useState(null)
 
     const tabs = [
         { id: 'upload', label: 'Upload & Detect', icon: '📤' },
@@ -19,29 +21,28 @@ export default function MainApp() {
         { id: 'compare', label: 'Compare Methods', icon: '⚖️' }
     ]
 
-    const handleFileUpload = async (file, detectionType = 'enhanced') => {
+    const handleFileUpload = async (file, detectionMethod = 'enhanced') => {
         if (!file) return
 
         setUploadLoading(true)
         setUploadStatus(null)
 
         try {
-            const formData = new FormData()
-            formData.append('file', file)
-
-            // Call the appropriate detection endpoint
-            const endpoint = `/detect/${detectionType}`
-            const result = await api.post(endpoint, formData)
+            // Generate a filename if the file doesn't have one
+            const filename = file.name || `upload_${Date.now()}.jpg`
+            
+            // Use the new cow detection API
+            const result = await api.cowDetection.detectFromFile(file, filename, detectionMethod)
 
             if (result.error) {
                 setUploadStatus({
                     type: 'error',
-                    message: `Upload failed: ${result.error}`
+                    message: `Detection failed: ${result.error}`
                 })
             } else {
                 setUploadStatus({
                     type: 'success',
-                    message: `Detection completed! Found ${result.total_cows} cow(s)`
+                    message: `Detection completed! Found ${result.total_cows} cow(s) using ${result.method} method`
                 })
                 setDetectionResults(result)
                 // Switch to results tab after successful detection
@@ -50,7 +51,7 @@ export default function MainApp() {
         } catch (error) {
             setUploadStatus({
                 type: 'error',
-                message: `Upload failed: ${error.message}`
+                message: `Detection failed: ${error.message}`
             })
         } finally {
             setUploadLoading(false)
@@ -60,7 +61,55 @@ export default function MainApp() {
     const handleFileChange = (event) => {
         const file = event.target.files[0]
         if (file) {
-            handleFileUpload(file)
+            setUploadedFile(file)
+            handleFileUpload(file, selectedDetectionMethod)
+        }
+    }
+
+    const handleDetectionMethodChange = (method) => {
+        setSelectedDetectionMethod(method)
+        // If we have a file, re-run detection with the new method
+        if (uploadedFile && !uploadLoading) {
+            handleFileUpload(uploadedFile, method)
+        }
+    }
+
+    const handleCompareDetectionMethods = async () => {
+        if (!uploadedFile) {
+            setUploadStatus({
+                type: 'error',
+                message: 'Please upload an image first to compare detection methods'
+            })
+            return
+        }
+
+        setUploadLoading(true)
+        setUploadStatus(null)
+
+        try {
+            const filename = uploadedFile.name || `upload_${Date.now()}.jpg`
+            const result = await api.cowDetection.compareDetectionMethods(filename)
+
+            if (result.error) {
+                setUploadStatus({
+                    type: 'error',
+                    message: `Comparison failed: ${result.error}`
+                })
+            } else {
+                setUploadStatus({
+                    type: 'success',
+                    message: 'Method comparison completed!'
+                })
+                setDetectionResults(result)
+                setActiveTab('results')
+            }
+        } catch (error) {
+            setUploadStatus({
+                type: 'error',
+                message: `Comparison failed: ${error.message}`
+            })
+        } finally {
+            setUploadLoading(false)
         }
     }
 
@@ -150,31 +199,30 @@ export default function MainApp() {
                                         </div>
                                         
                                         <div className="flex justify-center">
-                                            <label htmlFor="file-upload" className="cursor-pointer">
-                                                <Button 
-                                                    variant="default" 
-                                                    size="lg"
-                                                    disabled={uploadLoading}
-                                                    className="min-w-32"
-                                                >
-                                                    {uploadLoading ? (
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                                            Processing...
-                                                        </div>
-                                                    ) : (
-                                                        'Select File'
-                                                    )}
-                                                </Button>
-                                                <input
-                                                    id="file-upload"
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={handleFileChange}
-                                                    className="hidden"
-                                                    disabled={uploadLoading}
-                                                />
-                                            </label>
+                                            <Button 
+                                                variant="default" 
+                                                size="lg"
+                                                disabled={uploadLoading}
+                                                className="min-w-32"
+                                                onClick={() => document.getElementById('file-upload').click()}
+                                            >
+                                                {uploadLoading ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                        Processing...
+                                                    </div>
+                                                ) : (
+                                                    'Select File'
+                                                )}
+                                            </Button>
+                                            <input
+                                                id="file-upload"
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileChange}
+                                                className="hidden"
+                                                disabled={uploadLoading}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -191,22 +239,75 @@ export default function MainApp() {
                                     </div>
                                 )}
 
+                                {/* Current file status */}
+                                {uploadedFile && (
+                                    <div className="p-4 bg-muted/20 rounded-lg border border-border">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium text-foreground">
+                                                    Current File: {uploadedFile.name}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Size: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                                                </p>
+                                            </div>
+                                            <Badge variant="secondary">
+                                                {selectedDetectionMethod === 'enhanced' ? '✨ Enhanced' : '🎯 Ultra'}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Detection Options */}
                                 <div className="space-y-4">
                                     <h4 className="font-semibold text-foreground">Detection Methods:</h4>
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                        <Badge variant="default" className="p-3 justify-center text-sm">
-                                            <span className="mr-2">✨</span>
-                                            Enhanced (Default)
-                                        </Badge>
-                                        <Badge variant="outline" className="p-3 justify-center text-sm hover:bg-muted/50">
-                                            <span className="mr-2">🎯</span>
-                                            Ultra-Aggressive
-                                        </Badge>
-                                        <Badge variant="outline" className="p-3 justify-center text-sm hover:bg-muted/50">
-                                            <span className="mr-2">⚖️</span>
-                                            Method Comparison
-                                        </Badge>
+                                        <button
+                                            onClick={() => handleDetectionMethodChange('enhanced')}
+                                            disabled={uploadLoading}
+                                            className={cn(
+                                                "p-3 rounded-lg border transition-all duration-200",
+                                                selectedDetectionMethod === 'enhanced'
+                                                    ? 'bg-primary text-primary-foreground border-primary'
+                                                    : 'border-border hover:border-primary/50 hover:bg-muted/50',
+                                                uploadLoading && 'opacity-50 cursor-not-allowed'
+                                            )}
+                                        >
+                                            <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                                                <span>✨</span>
+                                                Enhanced (Recommended)
+                                            </div>
+                                        </button>
+                                        <button
+                                            onClick={() => handleDetectionMethodChange('ultra')}
+                                            disabled={uploadLoading}
+                                            className={cn(
+                                                "p-3 rounded-lg border transition-all duration-200",
+                                                selectedDetectionMethod === 'ultra'
+                                                    ? 'bg-primary text-primary-foreground border-primary'
+                                                    : 'border-border hover:border-primary/50 hover:bg-muted/50',
+                                                uploadLoading && 'opacity-50 cursor-not-allowed'
+                                            )}
+                                        >
+                                            <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                                                <span>🎯</span>
+                                                Ultra-Aggressive
+                                            </div>
+                                        </button>
+                                        <button
+                                            onClick={handleCompareDetectionMethods}
+                                            disabled={uploadLoading || !uploadedFile}
+                                            className={cn(
+                                                "p-3 rounded-lg border transition-all duration-200",
+                                                "border-border hover:border-primary/50 hover:bg-muted/50",
+                                                (uploadLoading || !uploadedFile) && 'opacity-50 cursor-not-allowed'
+                                            )}
+                                        >
+                                            <div className="flex items-center justify-center gap-2 text-sm font-medium">
+                                                <span>⚖️</span>
+                                                Compare Methods
+                                            </div>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -221,76 +322,134 @@ export default function MainApp() {
                             {detectionResults && (
                                 <Badge variant="default" className="px-4 py-2">
                                     <span className="mr-2">🐄</span>
-                                    {detectionResults.total_cows} cow(s) detected
+                                    {detectionResults.methods 
+                                        ? `${detectionResults.summary?.best_method || 'Comparison'} Results`
+                                        : `${detectionResults.total_cows} cow(s) detected`
+                                    }
                                 </Badge>
                             )}
                         </div>
                         
                         {detectionResults ? (
                             <div className="space-y-6">
-                                <Card className="p-6">
-                                    <div className="space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <h3 className="text-xl font-semibold flex items-center gap-2">
-                                                <span className="text-2xl">✅</span>
-                                                Analysis Complete
-                                            </h3>
-                                            <Badge variant="default" size="lg">
-                                                {detectionResults.total_cows} cow(s) detected
-                                            </Badge>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-                                                <div className="text-3xl font-bold text-primary mb-2">
-                                                    {detectionResults.total_cows}
-                                                </div>
-                                                <div className="text-sm font-medium text-muted-foreground">Total Cows</div>
+                                {/* Check if this is a comparison result or single detection result */}
+                                {detectionResults.methods ? (
+                                    // Comparison results
+                                    <Card className="p-6">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-xl font-semibold flex items-center gap-2">
+                                                    <span className="text-2xl">⚖️</span>
+                                                    Method Comparison Results
+                                                </h3>
+                                                <Badge variant="default" size="lg">
+                                                    Best: {detectionResults.summary?.best_method || 'N/A'}
+                                                </Badge>
                                             </div>
-                                            <div className="text-center p-6 bg-gradient-to-br from-cow-confirmed/10 to-cow-confirmed/5 rounded-xl border border-cow-confirmed/20">
-                                                <div className="text-3xl font-bold text-cow-confirmed mb-2">
-                                                    {detectionResults.detections?.length || 0}
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                                                    <div className="text-3xl font-bold text-primary mb-2">
+                                                        {detectionResults.methods?.enhanced?.count || 0}
+                                                    </div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Enhanced Method</div>
                                                 </div>
-                                                <div className="text-sm font-medium text-muted-foreground">Detections</div>
-                                            </div>
-                                            <div className="text-center p-6 bg-gradient-to-br from-cow-pending/10 to-cow-pending/5 rounded-xl border border-cow-pending/20">
-                                                <div className="text-2xl font-bold text-cow-pending mb-2">
-                                                    Enhanced
+                                                <div className="text-center p-6 bg-gradient-to-br from-cow-confirmed/10 to-cow-confirmed/5 rounded-xl border border-cow-confirmed/20">
+                                                    <div className="text-3xl font-bold text-cow-confirmed mb-2">
+                                                        {detectionResults.methods?.ultra?.count || 0}
+                                                    </div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Ultra-Aggressive Method</div>
                                                 </div>
-                                                <div className="text-sm font-medium text-muted-foreground">Method Used</div>
                                             </div>
-                                        </div>
 
-                                        {detectionResults.message && (
-                                            <div className="p-4 bg-muted/30 rounded-xl border border-border">
-                                                <p className="text-sm text-muted-foreground">
-                                                    {detectionResults.message}
-                                                </p>
+                                            {detectionResults.summary && (
+                                                <div className="p-4 bg-muted/30 rounded-xl border border-border">
+                                                    <h4 className="font-semibold mb-2">Summary</h4>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Best performing method: <strong>{detectionResults.summary.best_method}</strong>
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Card>
+                                ) : (
+                                    // Single detection results
+                                    <Card className="p-6">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-xl font-semibold flex items-center gap-2">
+                                                    <span className="text-2xl">✅</span>
+                                                    Analysis Complete
+                                                </h3>
+                                                <Badge variant="default" size="lg">
+                                                    {detectionResults.total_cows} cow(s) detected
+                                                </Badge>
                                             </div>
-                                        )}
-                                    </div>
-                                </Card>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
+                                                    <div className="text-3xl font-bold text-primary mb-2">
+                                                        {detectionResults.total_cows}
+                                                    </div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Total Cows</div>
+                                                </div>
+                                                <div className="text-center p-6 bg-gradient-to-br from-cow-confirmed/10 to-cow-confirmed/5 rounded-xl border border-cow-confirmed/20">
+                                                    <div className="text-3xl font-bold text-cow-confirmed mb-2">
+                                                        {detectionResults.detections?.length || 0}
+                                                    </div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Detections</div>
+                                                </div>
+                                                <div className="text-center p-6 bg-gradient-to-br from-cow-pending/10 to-cow-pending/5 rounded-xl border border-cow-pending/20">
+                                                    <div className="text-2xl font-bold text-cow-pending mb-2">
+                                                        {detectionResults.method || 'Enhanced'}
+                                                    </div>
+                                                    <div className="text-sm font-medium text-muted-foreground">Method Used</div>
+                                                </div>
+                                            </div>
+
+                                            {detectionResults.message && (
+                                                <div className="p-4 bg-muted/30 rounded-xl border border-border">
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {detectionResults.message}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Card>
+                                )}
 
                                 {/* Additional Results Info */}
-                                <Card className="p-6">
-                                    <h4 className="text-lg font-semibold mb-4">Detection Details</h4>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                                            <span className="text-sm font-medium">Processing Time</span>
-                                            <Badge variant="outline">
-                                                {detectionResults.processing_time || 'N/A'}
-                                            </Badge>
+                                {!detectionResults.methods && (
+                                    <Card className="p-6">
+                                        <h4 className="text-lg font-semibold mb-4">Detection Details</h4>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                                                <span className="text-sm font-medium">Processing Time</span>
+                                                <Badge variant="outline">
+                                                    {detectionResults.processing_time || 'N/A'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                                                <span className="text-sm font-medium">Algorithm</span>
+                                                <Badge variant="secondary">
+                                                    {detectionResults.method || 'Enhanced Detection'}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                                                <span className="text-sm font-medium">Confidence Threshold</span>
+                                                <Badge variant="outline">0.5</Badge>
+                                            </div>
+                                            {detectionResults.image_path && (
+                                                <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
+                                                    <span className="text-sm font-medium">Image Path</span>
+                                                    <Badge variant="outline" className="text-xs max-w-48 truncate">
+                                                        {detectionResults.image_path}
+                                                    </Badge>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                                            <span className="text-sm font-medium">Algorithm</span>
-                                            <Badge variant="secondary">Enhanced Detection</Badge>
-                                        </div>
-                                        <div className="flex justify-between items-center p-3 bg-muted/20 rounded-lg">
-                                            <span className="text-sm font-medium">Confidence Threshold</span>
-                                            <Badge variant="outline">0.5</Badge>
-                                        </div>
-                                    </div>
-                                </Card>
+                                    </Card>
+                                )}
                             </div>
                         ) : (
                             <Card className="p-12 text-center">
@@ -398,17 +557,44 @@ export default function MainApp() {
                                     Side-by-Side Comparison
                                 </h3>
                                 <p className="text-muted-foreground max-w-2xl mx-auto">
-                                    Upload an image to compare all three detection methods simultaneously and see detailed performance metrics for each approach.
+                                    Upload an image to compare Enhanced and Ultra-Aggressive detection methods simultaneously and see detailed performance metrics for each approach.
                                 </p>
-                                <div className="pt-4">
-                                    <Button 
-                                        variant="outline" 
-                                        size="lg"
-                                        onClick={() => setActiveTab('upload')}
-                                    >
-                                        <span className="mr-2">📤</span>
-                                        Start Comparison
-                                    </Button>
+                                <div className="pt-4 space-y-3">
+                                    {uploadedFile ? (
+                                        <div className="space-y-3">
+                                            <p className="text-sm text-muted-foreground">
+                                                Image loaded: <strong>{uploadedFile.name}</strong>
+                                            </p>
+                                            <Button 
+                                                variant="default" 
+                                                size="lg"
+                                                onClick={handleCompareDetectionMethods}
+                                                disabled={uploadLoading}
+                                                className="min-w-40"
+                                            >
+                                                {uploadLoading ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                                        Comparing...
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className="mr-2">⚖️</span>
+                                                        Compare Methods
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <Button 
+                                            variant="outline" 
+                                            size="lg"
+                                            onClick={() => setActiveTab('upload')}
+                                        >
+                                            <span className="mr-2">📤</span>
+                                            Upload Image First
+                                        </Button>
+                                    )}
                                 </div>
                             </div>
                         </Card>

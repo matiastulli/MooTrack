@@ -201,4 +201,31 @@ export const api = {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
   },
+
+  // Cow detection methods
+  cowDetection: {
+    detectFromFile: async (file, filename, detectionMethod = 'enhanced') => {
+      const formData = new FormData();
+      formData.append('file_content', file);
+      
+      return api.post('cow-counter/detect/file', formData, {
+        params: {
+          filename: filename,
+          detection_method: detectionMethod
+        }
+      });
+    },
+
+    compareDetectionMethods: async (filename) => {
+      return api.get(`cow-counter/detect/compare/${filename}`);
+    },
+
+    listImages: async () => {
+      return api.get('cow-counter/images');
+    },
+
+    deleteImage: async (filename) => {
+      return api.delete(`cow-counter/images/${filename}`);
+    }
+  }
 };

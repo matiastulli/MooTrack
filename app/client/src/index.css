@@ -2,83 +2,111 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar hiding */
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
 :root {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Traditional black wallet theme - light mode with steel and charcoal accents */
+  --background: 0 0% 100%;          /* Pure white */
+  --foreground: 220 15% 15%;        /* Deep charcoal text */
+  --card: 0 0% 100%;                /* White cards */
+  --card-foreground: 220 15% 15%;
+  --popover: 0 0% 100%;             /* White popover */
+  --popover-foreground: 220 15% 15%;
+  --primary: 220 15% 20%;           /* Dark charcoal primary */
+  --primary-foreground: 210 15% 98%;
+  --secondary: 220 10% 96%;         /* Light steel gray */
+  --secondary-foreground: 220 15% 20%;
+  --muted: 220 8% 95%;              /* Subtle cool gray */
+  --muted-foreground: 220 10% 45%;  /* Medium charcoal */
+  --accent: 210 25% 40%;            /* Steel blue accent */
+  --accent-foreground: 0 0% 100%;
 
-  /* HSL Color System - Enhanced for better readability */
-  --background: 0 0% 98%;
-  --foreground: 210 11% 15%;
-  --card: 0 0% 100%;
-  --card-foreground: 210 11% 15%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 210 11% 15%;
-  --primary: 197 100% 47%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 210 11% 96%;
-  --secondary-foreground: 210 11% 15%;
-  --muted: 210 11% 96%;
-  --muted-foreground: 210 11% 45%;
-  --accent: 210 11% 96%;
-  --accent-foreground: 210 11% 15%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 210 11% 90%;
-  --input: 210 11% 90%;
-  --ring: 197 100% 47%;
-  --radius: 0.75rem;
+  /* Financial indicators - professional and clear */
+  --positive: 140 35% 35%;          /* Deep emerald green */
+  --positive-foreground: 0 0% 100%;
+  --destructive: 0 45% 45%;         /* Deep crimson */
+  --destructive-foreground: 0 0% 98%;
 
-  /* Cow Detection Specific Colors - Enhanced */
-  --cow-confirmed: 134 61% 41%;
-  --cow-rejected: 0 84% 60%;
-  --cow-pending: 45 93% 47%;
-  --confidence-high: 134 61% 41%;
-  --confidence-medium: 45 93% 47%;
-  --confidence-low: 0 84% 60%;
+  /* Chart colors - sophisticated light mode palette */
+  --chart-1: 140 35% 35%;           /* Deep green */
+  --chart-2: 0 45% 45%;             /* Deep red */
+  --chart-3: 210 40% 45%;           /* Steel blue */
+  --chart-4: 220 15% 35%;           /* Charcoal gray */
+  --chart-5: 240 25% 40%;           /* Deep slate */
 
-  /* Chart Colors */
-  --chart-1: 197 100% 47%;
-  --chart-2: 134 61% 41%;
-  --chart-3: 45 93% 47%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 20 80% 55%;
+  --border: 220 15% 85%;            /* Light steel border */
+  --input: 220 8% 97%;              /* Light input background */
+  --ring: 210 25% 40%;              /* Steel focus ring */
+  --radius: 0.5rem;
 
-  /* Enhanced spacing for 40+ users */
-  --spacing-comfortable: 1.5rem;
-  --text-readable: 1.125rem;
+  /* Filter specific colors */
+  --filter-bg: 220 10% 98%;
+  --filter-hover: 220 8% 94%;
+  --filter-active: 210 20% 92%;     /* Light steel active state */
+
+  /* Alert & notification colors - professional and clear */
+  --success-bg: 140 30% 95%;        /* Light emerald background */
+  --success-fg: 140 35% 25%;        /* Dark emerald text */
+  --warning-bg: 210 25% 95%;        /* Light steel blue background */
+  --warning-fg: 210 30% 30%;        /* Dark steel blue text */
+  --info-bg: 220 15% 96%;           /* Light charcoal background */
+  --info-fg: 220 20% 25%;           /* Dark charcoal text */
 }
 
 .dark {
-  --background: 210 11% 7%;
-  --foreground: 210 11% 95%;
-  --card: 210 11% 9%;
-  --card-foreground: 210 11% 95%;
-  --popover: 210 11% 9%;
-  --popover-foreground: 210 11% 95%;
-  --primary: 197 100% 47%;
-  --primary-foreground: 210 11% 7%;
-  --secondary: 210 11% 15%;
-  --secondary-foreground: 210 11% 95%;
-  --muted: 210 11% 15%;
-  --muted-foreground: 210 11% 65%;
-  --accent: 210 11% 15%;
-  --accent-foreground: 210 11% 95%;
-  --destructive: 0 62% 50%;
-  --destructive-foreground: 210 11% 95%;
-  --border: 210 11% 15%;
-  --input: 210 11% 15%;
-  --ring: 197 100% 47%;
-
-  /* Dark mode cow detection colors */
-  --cow-confirmed: 134 55% 55%;
-  --cow-rejected: 0 62% 50%;
-  --cow-pending: 45 85% 55%;
-  --confidence-high: 134 55% 55%;
-  --confidence-medium: 45 85% 55%;
-  --confidence-low: 0 62% 50%;
+  /* Clean neutral theme - warm grays with minimal color */
+  --background: 0 0% 9%;              /* Pure dark gray */
+  --foreground: 0 0% 95%;             /* Clean white */
+  --card: 0 0% 13%;                   /* Dark card */
+  --card-foreground: 0 0% 95%;
+  --popover: 0 0% 15%;                /* Popover background */
+  --popover-foreground: 0 0% 95%;
+  --primary: 0 0% 85%;                /* Light gray primary */
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 20%;              /* Medium gray */
+  --secondary-foreground: 0 0% 90%;
+  --muted: 0 0% 18%;                  /* Muted background */
+  --muted-foreground: 0 0% 65%;       /* Muted text */
+  --accent: 0 0% 75%;                 /* Light accent */
+  --accent-foreground: 0 0% 9%;
+  /* Functional indicators */
+  --positive: 120 25% 45%;            /* Subtle green */
+  --positive-foreground: 0 0% 95%;
+  --destructive: 0 30% 50%;           /* Subtle red */
+  --destructive-foreground: 0 0% 95%;
+  /* Chart colors - monochrome with subtle variations */
+  --chart-1: 0 0% 75%;                /* Light gray */
+  --chart-2: 0 0% 60%;                /* Medium gray */
+  --chart-3: 0 0% 45%;                /* Dark gray */
+  --chart-4: 0 0% 85%;                /* Very light gray */
+  --chart-5: 0 0% 30%;                /* Darker gray */
+  --border: 0 0% 25%;                 /* Border gray */
+  --input: 0 0% 18%;                  /* Input background */
+  --ring: 0 0% 75%;                   /* Focus ring */
+  /* Filter-specific colors */
+  --filter-bg: 0 0% 16%;
+  --filter-hover: 0 0% 22%;
+  --filter-active: 0 0% 28%;          /* Active state */
+  /* Alert & notification colors */
+  --success-bg: 0 0% 16%;             /* Dark background */
+  --success-fg: 120 15% 70%;          /* Muted green text */
+  --warning-bg: 0 0% 16%;             /* Dark background */
+  --warning-fg: 40 20% 70%;           /* Muted yellow text */
+  --info-bg: 0 0% 16%;                /* Dark background */
+  --info-fg: 0 0% 80%;                /* Light gray text */
 }
-
 @layer base {
   * {
     border-color: hsl(var(--border));
@@ -99,7 +127,7 @@
   /* Enhanced button styles for better accessibility */
   button {
     min-height: 44px; /* Minimum touch target size */
-    font-weight: 600;
+    font-weight: 500;
   }
 
   /* Improved focus styles */

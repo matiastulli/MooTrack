@@ -9,7 +9,7 @@ from ..config import (
 )
 
 # Import enhanced detection functions
-from .cow_counter import enhanced_cow_detection
+from .cow_counter_enhanced import enhanced_cow_detection
 from .cow_counter_ultra import detect_cows_aggressive
 
 # Global variable to store the YOLO model (loaded once)

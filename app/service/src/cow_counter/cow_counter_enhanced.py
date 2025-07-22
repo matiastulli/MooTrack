@@ -285,7 +285,7 @@ def create_detection_visualizations(image, detections, output_dir, fig, axes):
             axes[i, j].axis('off')
     
     plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, 'detection_analysis.png'), dpi=300, bbox_inches='tight')
+    plt.savefig(os.path.join(output_dir, 'detection_analysis_enhanced.png'), dpi=300, bbox_inches='tight')
     plt.close()
     
     # Save annotated result image
@@ -358,7 +358,7 @@ def save_detection_results(image_path, detections, best_model, output_dir):
         json_results["detections"].append(detection_data)
     
     # Save main JSON file with all detection data
-    json_file = os.path.join(output_dir, 'detection_results.json')
+    json_file = os.path.join(output_dir, 'detection_results_enhanced.json')
     with open(json_file, 'w') as f:
         json.dump(json_results, f, indent=2)
     
@@ -382,12 +382,12 @@ def save_detection_results(image_path, detections, best_model, output_dir):
         "method": "enhanced"
     }
     
-    api_json_file = os.path.join(output_dir, 'api_detection_results.json')
+    api_json_file = os.path.join(output_dir, 'api_detection_results_enhanced.json')
     with open(api_json_file, 'w') as f:
         json.dump(api_format, f, indent=2)
     
     # Save text summary file
-    summary_file = os.path.join(output_dir, 'enhanced_detection_summary.txt')
+    summary_file = os.path.join(output_dir, 'enhanced_detection_summary_enhanced.txt')
     
     with open(summary_file, 'w') as f:
         f.write("Enhanced Cow Detection Results\n")
@@ -413,9 +413,9 @@ def save_detection_results(image_path, detections, best_model, output_dir):
             f.write(f"  Center point: ({int((x1+x2)/2)}, {int((y1+y2)/2)})\n\n")
         
         f.write("\nFiles generated:\n")
-        f.write(f"- detection_results.json (detailed evaluation format)\n")
-        f.write(f"- api_detection_results.json (API-compatible format)\n")
-        f.write(f"- enhanced_detection_summary.txt (human-readable summary)\n")
-        f.write(f"- annotated_result.jpg (visual result)\n")
-        f.write(f"- detection_analysis.png (analysis visualization)\n")
+        f.write(f"- detection_results_enhanced.json (detailed evaluation format)\n")
+        f.write(f"- api_detection_results_enhanced.json (API-compatible format)\n")
+        f.write(f"- detection_summary_enhanced.txt (human-readable summary)\n")
+        f.write(f"- annotated_result_enhanced.jpg (visual result)\n")
+        f.write(f"- detection_analysis_enhanced.png (analysis visualization)\n")
 

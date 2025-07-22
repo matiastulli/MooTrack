@@ -1,0 +1,21 @@
+FROM python:3.11.6
+
+WORKDIR /app
+
+ARG PORT
+ENV PORT=${PORT:-3001}
+
+# Copy requirements file and install dependencies
+COPY app/service/requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy your application code
+COPY app/service/alembic.ini /app/alembic.ini
+COPY app/service/migrations /app/migrations
+COPY app/service/src /app/src
+COPY app/service/entrypoint.sh /app/entrypoint.sh
+
+EXPOSE ${PORT}
+
+CMD ["/bin/bash", "/app/entrypoint.sh"]

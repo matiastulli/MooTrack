@@ -19,18 +19,3 @@ class AnalysisResponse(BaseModel):
     analysis_complete: bool
     message: str
     method: Optional[str] = "enhanced"
-
-class HealthResponse(BaseModel):
-    status: str
-    message: str
-
-class ImageInfo(BaseModel):
-    filename: str
-    size: int
-    url: str
-
-class ImageListResponse(BaseModel):
-    images: List[ImageInfo]
-
-class DeleteResponse(BaseModel):
-    message: str

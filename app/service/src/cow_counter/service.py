@@ -122,24 +122,3 @@ def save_uploaded_file(file_content: UploadFile, filename: str, images_dir: Path
         file_content.file.seek(0)
     return file_path
 
-
-def list_image_files(images_dir: Path) -> List[Dict[str, Any]]:
-    """List all available image files"""
-    images = []
-    for file_path in images_dir.glob("*"):
-        if file_path.is_file() and file_path.suffix.lower() in ['.jpg', '.jpeg', '.png']:
-            images.append({
-                "filename": file_path.name,
-                "size": file_path.stat().st_size,
-                "url": f"/images/{file_path.name}"
-            })
-    return images
-
-
-def delete_image_file(filename: str, images_dir: Path) -> bool:
-    """Delete an image file"""
-    file_path = images_dir / filename
-    if file_path.exists():
-        file_path.unlink()
-        return True
-    return False

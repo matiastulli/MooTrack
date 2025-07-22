@@ -7,7 +7,7 @@ from .service import (
     load_model
 )
 from .router import router
-from .schema import AnalysisResponse, DetectionResult, HealthResponse
+from .schema import AnalysisResponse, DetectionResult
 
 __all__ = [
     'detect_cows_enhanced',
@@ -15,6 +15,5 @@ __all__ = [
     'load_model', 
     'router',
     'AnalysisResponse',
-    'DetectionResult',
-    'HealthResponse'
+    'DetectionResult'
 ]

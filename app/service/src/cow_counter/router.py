@@ -5,14 +5,13 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 
 # Import schemas
 from .schema import (
-    AnalysisResponse,
-    ImageListResponse, DeleteResponse
+    AnalysisResponse
 )
 
 # Import services
 from .service import (
     detect_cows_enhanced, detect_cows_ultra_aggressive,
-    save_uploaded_file, list_image_files, delete_image_file, load_model
+    save_uploaded_file, load_model
 )
 
 # Import configuration
@@ -73,38 +72,6 @@ async def detect_cows_from_file(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Detection failed: {str(e)}")
-
-
-# Image management endpoints
-
-
-@router.get("/images", response_model=ImageListResponse)
-async def list_images():
-    """
-    List all available images.
-    """
-    try:
-        images = list_image_files(IMAGES_DIR)
-        return ImageListResponse(images=images)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error listing images: {str(e)}")
-
-
-@router.delete("/images/{filename}", response_model=DeleteResponse)
-async def delete_image(filename: str):
-    """
-    Delete an image file.
-    """
-    try:
-        success = delete_image_file(filename, IMAGES_DIR)
-        if success:
-            return DeleteResponse(message=f"Image {filename} deleted successfully")
-        else:
-            raise HTTPException(status_code=404, detail="Image file not found")
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error deleting image: {str(e)}")
 
 
 # Initialize model on module load

@@ -317,33 +317,3 @@ def save_detection_results(image_path, detections, best_model, output_dir):
             f.write(f"  Detected by: {model}\n")
             f.write(f"  Box size: {x2-x1} x {y2-y1} pixels\n\n")
 
-def main():
-    """
-    Main function with enhanced cow detection.
-    """
-    print("🐄 Enhanced Cow Counter - Multi-Model YOLO Detection 🐄")
-    print("=" * 60)
-    print("Starting enhanced cow detection with multiple models and techniques...")
-    
-    # Image path
-    image_path = "images/DJI_20250510112351_0160_D.JPG"
-    
-    # Check if image exists
-    if not os.path.exists(image_path):
-        print(f"Error: Image file {image_path} not found!")
-        return
-    
-    try:
-        # Enhanced detection
-        cow_count, detections = enhanced_cow_detection(image_path)
-        
-        print("✅ Enhanced processing complete!")
-        print(f"📊 Total cows detected: {cow_count}")
-    
-    except Exception as e:
-        print(f"❌ Error during enhanced processing: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
-if __name__ == "__main__":
-    main()

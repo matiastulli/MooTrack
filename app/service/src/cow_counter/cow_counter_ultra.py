@@ -386,30 +386,3 @@ def save_detection_results(image_path, detections, output_dir="output"):
     
     print(f"💾 Detection results saved to {json_file}")
     return json_file
-
-def main():
-    print("🚀 ULTRA-AGGRESSIVE COW DETECTION 🚀")
-    print("=" * 50)
-    
-    image_path = "images/DJI_20250510112351_0160_D.JPG"
-    
-    if not os.path.exists(image_path):
-        print(f"Error: Image {image_path} not found!")
-        return
-    
-    try:
-        count, detections = detect_cows_aggressive(image_path)
-        
-        # Save detection results for web interface
-        save_detection_results(image_path, detections)
-        
-        print(f"\n🎉 FINAL RESULTS:")
-        print(f"📊 Total cows detected: {count}")
-        
-    except Exception as e:
-        print(f"💥 Error: {e}")
-        import traceback
-        traceback.print_exc()
-
-if __name__ == "__main__":
-    main()

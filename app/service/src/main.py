@@ -50,7 +50,7 @@ if OUTPUT_DIR.exists():
     app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 
 # Include the cow detection router
-app.include_router(cow_router)
+app.include_router(cow_router, prefix="/cow_counter")
 
 # Legacy endpoints for backward compatibility
 @app.get("/")

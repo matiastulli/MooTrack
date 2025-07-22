@@ -11,14 +11,73 @@ const CowDetectionInterface = () => {
   const [detectionData, setDetectionData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [apiHealth, setApiHealth] = useState(null)
+
+  // Check API health
+  const checkApiHealth = async () => {
+    try {
+      const result = await api.cowDetection.getHealth()
+      if (result.error) {
+        setApiHealth({ status: 'error', message: result.error })
+      } else {
+        setApiHealth(result)
+      }
+    } catch (err) {
+      setApiHealth({ status: 'error', message: 'API connection failed' })
+    }
+  }
+
+  // Transform API response to frontend expected format
+  const transformApiResponse = (apiResponse) => {
+    if (!apiResponse || !apiResponse.detections) {
+      return null
+    }
+
+    // Create base64 image from path if needed
+    const imageName = apiResponse.image_path ? 
+      apiResponse.image_path.split('/').pop() || apiResponse.image_path.split('\\').pop() : 
+      'unknown.jpg'
+
+    return {
+      image_name: imageName,
+      image_base64: null, // Will be loaded separately if needed
+      image_width: 1920, // Default values, should be updated from actual image
+      image_height: 1080,
+      total_detections: apiResponse.total_cows || 0,
+      detections: apiResponse.detections.map((detection, index) => ({
+        id: index,
+        bbox: {
+          x1: Math.round(detection.bbox[0]),
+          y1: Math.round(detection.bbox[1]),
+          x2: Math.round(detection.bbox[2]),
+          y2: Math.round(detection.bbox[3]),
+          width: Math.round(detection.bbox[2] - detection.bbox[0]),
+          height: Math.round(detection.bbox[3] - detection.bbox[1])
+        },
+        confidence: detection.confidence,
+        class_name: detection.class_name || 'cow',
+        model: 'yolo',
+        size: (detection.bbox[2] - detection.bbox[0]) * (detection.bbox[3] - detection.bbox[1]),
+        is_cow: true, // Default to true, user can change
+        verified: false // User hasn't verified yet
+      }))
+    }
+  }
 
   // Load detection results from server
   const loadDetectionResults = async () => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await api.loadDetectionResults()
-      setDetectionData(data)
+      const result = await api.cowDetection.getResults()
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      // Transform the API response to match the expected frontend format
+      const transformedData = transformApiResponse(result)
+      setDetectionData(transformedData)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -27,12 +86,27 @@ const CowDetectionInterface = () => {
   }
 
   // Handle file upload
-  const handleFileUpload = async (file) => {
+  const handleFileUpload = async (file, transformedData = null) => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await api.loadFromFile(file)
-      setDetectionData(data)
+      
+      // If transformedData is provided (from server detection), use it directly
+      if (transformedData) {
+        setDetectionData(transformedData)
+        return
+      }
+      
+      // Otherwise, upload file and get detection results
+      const result = await api.cowDetection.detectFromUpload(file, 0.3)
+      
+      if (result.error) {
+        throw new Error(result.error)
+      }
+      
+      // Transform the API response to match the expected frontend format
+      const transformedResult = transformApiResponse(result)
+      setDetectionData(transformedResult)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -82,6 +156,7 @@ const CowDetectionInterface = () => {
 
   // Load results on mount
   useEffect(() => {
+    checkApiHealth()
     loadDetectionResults()
   }, [])
 
@@ -112,20 +187,30 @@ const CowDetectionInterface = () => {
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
             <h3 className="text-lg font-semibold text-destructive mb-2">
-              No detection results found
+              Connection Error
             </h3>
             <p className="text-destructive/80 mb-4">
-              Please run the cow detection script first by executing:{' '}
-              <code className="bg-destructive/20 px-2 py-1 rounded text-sm">
-                python cow_counter_ultra.py
-              </code>
+              {error}
             </p>
-            <button
-              onClick={loadDetectionResults}
-              className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Try Again
-            </button>
+            {apiHealth && (
+              <div className="text-sm text-muted-foreground mb-4">
+                API Status: {apiHealth.status === 'healthy' ? '✅ Connected' : '❌ Not Available'}
+              </div>
+            )}
+            <div className="space-y-2">
+              <p className="text-xs text-destructive/60">
+                Make sure the MooTrack API server is running on the configured port.
+              </p>
+              <button
+                onClick={() => {
+                  checkApiHealth()
+                  loadDetectionResults()
+                }}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
           </div>
         </div>
       </div>

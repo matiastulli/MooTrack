@@ -196,5 +196,80 @@ export const api = {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
+  },
+
+  // Cow Detection API methods
+  cowDetection: {
+    // Get API health status
+    getHealth: async () => {
+      return api.get('/health');
+    },
+
+    // Get API configuration
+    getConfig: async () => {
+      return api.get('/config');
+    },
+
+    // Upload image and detect cows
+    detectFromUpload: async (file, confidence = 0.3) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const headers = {};
+      const token = getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      try {
+        const normalizedEndpoint = '/cow_counter/detect';
+        const url = `${API_BASE_URL}${normalizedEndpoint}?confidence=${confidence}`;
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          return { error: error.detail || 'Detection failed' };
+        }
+
+        return response.json();
+      } catch (error) {
+        console.error('Detection upload failed:', error);
+        return { error: error.message || 'Upload failed' };
+      }
+    },
+
+    // Detect cows in existing file
+    detectFromFile: async (filename, confidence = 0.3) => {
+      return api.get(`/cow_counter/detect/file/${filename}?confidence=${confidence}`);
+    },
+
+    // Get latest detection results
+    getResults: async () => {
+      return api.get('/cow_counter/results');
+    },
+
+    // List all available images
+    listImages: async () => {
+      return api.get('/cow_counter/images');
+    },
+
+    // Delete an image
+    deleteImage: async (filename) => {
+      return api.delete(`/cow_counter/images/${filename}`);
+    }
+  },
+
+  // Legacy methods for backward compatibility
+  loadDetectionResults: async () => {
+    return api.cowDetection.getResults();
+  },
+
+  loadFromFile: async (file, confidence = 0.3) => {
+    return api.cowDetection.detectFromUpload(file, confidence);
   }
 };

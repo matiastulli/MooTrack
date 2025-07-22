@@ -8,6 +8,25 @@ const ImageViewer = ({ detectionData, onDetectionClick }) => {
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
   const [originalSize, setOriginalSize] = useState({ width: 1920, height: 1080 })
 
+  // Get the correct image URL based on the available data
+  const getImageUrl = (data) => {
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+    
+    if (data.image_base64) {
+      return data.image_base64
+    }
+    
+    if (data.image_name) {
+      return `${API_BASE_URL}/images/${data.image_name}`
+    }
+    
+    if (data.image_url) {
+      return data.image_url.startsWith('http') ? data.image_url : `${API_BASE_URL}${data.image_url}`
+    }
+    
+    return null
+  }
+
   useEffect(() => {
     if (detectionData) {
       setOriginalSize({
@@ -62,10 +81,17 @@ const ImageViewer = ({ detectionData, onDetectionClick }) => {
         <div ref={containerRef} className="relative inline-block max-w-full">
           <img
             ref={imageRef}
-            src={detectionData.image_url || detectionData.image_base64}
+            src={getImageUrl(detectionData)}
             alt="Cow detection results"
             className="max-w-full h-auto rounded-lg"
             onLoad={handleImageLoad}
+            onError={(e) => {
+              console.error('Image failed to load:', e.target.src)
+              // Fallback to base64 if available
+              if (detectionData.image_base64 && !e.target.src.includes('base64')) {
+                e.target.src = detectionData.image_base64
+              }
+            }}
           />
           
           {/* Render bounding boxes */}

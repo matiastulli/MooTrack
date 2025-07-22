@@ -22,9 +22,9 @@ ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ".jpg,.jpeg,.png").split(",
 
 # Directory Configuration
 BASE_DIR = Path(__file__).parent
-IMAGES_DIR = BASE_DIR / "images"
-OUTPUT_DIR = BASE_DIR / "output"
-UPLOADS_DIR = BASE_DIR / "uploads"  # For temporary uploads
+IMAGES_DIR = BASE_DIR / "cow_counter/images"
+OUTPUT_DIR = BASE_DIR / "cow_counter/output"
+UPLOADS_DIR = BASE_DIR / "cow_counter/uploads"
 
 # CORS Configuration
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")

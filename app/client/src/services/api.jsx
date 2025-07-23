@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mootrack.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://mootrack-service.up.railway.app';
 
 // Get JWT token from localStorage
 const getToken = () => localStorage.getItem('token');

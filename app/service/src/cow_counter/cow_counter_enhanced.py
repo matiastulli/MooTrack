@@ -21,7 +21,7 @@ def analyze_image_and_count_cows(image_path: str):
     
     with CLIENT.use_configuration(config):
         result = CLIENT.infer(image_path,
-                              model_id="cow-pyjdt-nving/1")
+                              model_id="aerial-cow-detection-4psqc/2")
 
     # Extract predictions from the response
     predictions = result.get("predictions", [])

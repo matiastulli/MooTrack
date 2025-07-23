@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils"
 import { api } from "@/services/api"
 import { Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
-import { DetectionList } from "./cow-counter/DetectionList"
 import { ImagePreview } from "./cow-counter/ImagePreview"
 import { ResultsSummary } from "./cow-counter/ResultsSummary"
 import { UploadArea } from "./cow-counter/UploadArea"
@@ -40,7 +39,6 @@ export default function MainApp() {
   const [confidenceFilter, setConfidenceFilter] = useState(20) // Default to 20%
   const [isUploadCollapsed, setIsUploadCollapsed] = useState(false)
   const [isResultsCollapsed, setIsResultsCollapsed] = useState(false)
-  const [isDetectionsCollapsed, setIsDetectionsCollapsed] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   useEffect(() => {
@@ -50,6 +48,24 @@ export default function MainApp() {
       }
     }
   }, [imagePreview])
+
+  // Auto-deselect detections that don't meet the confidence filter
+  useEffect(() => {
+    if (detectionResults?.detections && selectedDetections.size > 0) {
+      const validSelections = new Set()
+      selectedDetections.forEach(index => {
+        const detection = detectionResults.detections[index]
+        if (detection && detection.confidence >= confidenceFilter / 100) {
+          validSelections.add(index)
+        }
+      })
+      
+      // Only update if there are changes to avoid infinite loops
+      if (validSelections.size !== selectedDetections.size) {
+        setSelectedDetections(validSelections)
+      }
+    }
+  }, [confidenceFilter, detectionResults?.detections, selectedDetections])
 
   const convertFileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
@@ -313,7 +329,7 @@ export default function MainApp() {
               resetAnalysis={resetAnalysis}
             />
 
-            {/* Results Summary */}
+            {/* Results Summary & Detections Combined */}
             <ResultsSummary
               isCollapsed={isResultsCollapsed}
               setIsCollapsed={setIsResultsCollapsed}
@@ -321,19 +337,11 @@ export default function MainApp() {
               selectedDetections={selectedDetections}
               showBoundingBoxes={showBoundingBoxes}
               setShowBoundingBoxes={setShowBoundingBoxes}
-            />
-
-            {/* Detection List */}
-            <DetectionList
-              isCollapsed={isDetectionsCollapsed}
-              setIsCollapsed={setIsDetectionsCollapsed}
-              detectionResults={detectionResults}
-              selectedDetections={selectedDetections}
+              confidenceFilter={confidenceFilter}
+              setConfidenceFilter={setConfidenceFilter}
               toggleDetectionSelection={toggleDetectionSelection}
               selectAllDetections={selectAllDetections}
               deselectAllDetections={deselectAllDetections}
-              confidenceFilter={confidenceFilter}
-              setConfidenceFilter={setConfidenceFilter}
             />
             </div>
           </div>

@@ -88,7 +88,7 @@ export default function MainApp() {
       } else {
         setUploadStatus({
           type: "success",
-          message: `Analysis complete! Found ${response.total_cows} cow(s) in ${response.processing_time || "2.3s"}`,
+          message: `Analysis complete! Found ${response.total_cows} cow(s)`,
         })
         setDetectionResults(response)
         const imageUrl = URL.createObjectURL(file)

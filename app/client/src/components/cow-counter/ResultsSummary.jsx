@@ -63,12 +63,6 @@ export function ResultsSummary({
               {detectionResults.method}
             </Badge>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Time:</span>
-            <Badge variant="outline" size="sm" className="text-foreground/90 border-border/50">
-              {detectionResults.processing_time}
-            </Badge>
-          </div>
         </div>
 
         <div className="flex gap-2">

@@ -1,5 +1,6 @@
 "use client"
 
+import { compressImage } from "@/lib/imageUtils"
 import { cn } from "@/lib/utils"
 import { api } from "@/services/api"
 import { Moon, Sun } from "lucide-react"
@@ -49,6 +50,15 @@ export default function MainApp() {
     }
   }, [imagePreview])
 
+  const convertFileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleFileUpload = async (file, detectionMethod = "enhanced") => {
     if (!file) return
 
@@ -60,24 +70,32 @@ export default function MainApp() {
       const filename = file.name || `upload_${Date.now()}.jpg`
       console.log(`Uploading file: ${filename} with detection method: ${detectionMethod}`)
 
-      const result = await api.cowDetection.detectFromFile(file, filename, detectionMethod)
+      // Convert file to Base64
+      const base64File = await convertFileToBase64(file);
 
-      if (result.error) {
+      // Send the file using direct POST request
+      const response = await api.post("/cow-counter/detect", {
+        file_content: base64File,
+        file_name: filename,
+        detection_method: detectionMethod
+      });
+
+      if (response.error) {
         setUploadStatus({
           type: "error",
-          message: `Detection failed: ${result.error}`,
+          message: `Detection failed: ${response.error}`,
         })
       } else {
         setUploadStatus({
           type: "success",
-          message: `Analysis complete! Found ${result.total_cows} cow(s) in ${result.processing_time || "2.3s"}`,
+          message: `Analysis complete! Found ${response.total_cows} cow(s) in ${response.processing_time || "2.3s"}`,
         })
-        setDetectionResults(result)
+        setDetectionResults(response)
         const imageUrl = URL.createObjectURL(file)
         setImagePreview(imageUrl)
         setIsUploadCollapsed(true)
-        if (result.detections) {
-          setSelectedDetections(new Set(result.detections.map((_, index) => index)))
+        if (response.detections) {
+          setSelectedDetections(new Set(response.detections.map((_, index) => index)))
         }
       }
     } catch (error) {
@@ -90,31 +108,45 @@ export default function MainApp() {
     }
   }
 
-  const handleFileChange = (event) => {
+  const handleFileChange = async (event) => {
     const file = event.target.files?.[0]
     if (file) {
-      // Validate file size (50MB limit)
-      if (file.size > 50 * 1024 * 1024) {
-        setUploadStatus({
-          type: "error",
-          message: "File size must be less than 50MB. Please choose a smaller image.",
-        })
-        return
-      }
-
       // Validate file type
       if (!file.type.startsWith("image/")) {
         setUploadStatus({
           type: "error",
           message: "Please select a valid image file (JPG, JPEG, or PNG).",
         })
-        return
+        return;
       }
 
-      setUploadedFile(file)
-      const imageUrl = URL.createObjectURL(file)
-      setImagePreview(imageUrl)
-      handleFileUpload(file, selectedDetectionMethod)
+      try {
+        // Compress image if it's larger than 5MB
+        let processedFile = file;
+        if (file.size > 5 * 1024 * 1024) {
+          processedFile = await compressImage(file);
+        }
+
+        // Validate final file size (50MB limit)
+        if (processedFile.size > 50 * 1024 * 1024) {
+          setUploadStatus({
+            type: "error",
+            message: "File size must be less than 50MB. Please choose a smaller image.",
+          })
+          return;
+        }
+
+        setUploadedFile(processedFile)
+        const imageUrl = URL.createObjectURL(processedFile)
+        setImagePreview(imageUrl)
+        handleFileUpload(processedFile, selectedDetectionMethod)
+      } catch (error) {
+        setUploadStatus({
+          type: "error",
+          message: "Error processing image. Please try again.",
+        })
+        console.error('Error processing image:', error)
+      }
     }
   }
 

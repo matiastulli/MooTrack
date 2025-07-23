@@ -114,23 +114,6 @@ export function UploadArea({
               </div>
               <p className="text-xs text-muted-foreground">High accuracy detection</p>
             </button>
-            <button
-              onClick={() => handleDetectionMethodChange("ultra")}
-              disabled={uploadLoading}
-              className={cn(
-                "w-full p-3 rounded-lg border-2 transition-all duration-200 text-left text-sm",
-                selectedDetectionMethod === "ultra"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-border hover:border-primary/50 hover:bg-primary/5 bg-card text-foreground/90",
-                uploadLoading && "opacity-50 cursor-not-allowed",
-              )}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">🎯</span>
-                <span className="font-bold">Ultra</span>
-              </div>
-              <p className="text-xs text-muted-foreground">Maximum precision</p>
-            </button>
           </div>
         </div>
 

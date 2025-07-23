@@ -3,7 +3,7 @@ Cow detection module for MooTrack.
 """
 
 from .service import (
-    detect_cows_enhanced, detect_cows_ultra_aggressive, 
+    detect_cows_enhanced, 
     load_model
 )
 from .router import router
@@ -11,7 +11,6 @@ from .schema import AnalysisResponse, DetectionResult
 
 __all__ = [
     'detect_cows_enhanced',
-    'detect_cows_ultra_aggressive',
     'load_model', 
     'router',
     'AnalysisResponse',

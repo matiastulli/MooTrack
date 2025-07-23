@@ -1,0 +1,325 @@
+Enhanced Cow Detection Results
+==================================================
+
+Image processed: upload_1753229152395.jpg
+Image dimensions: 3830x2154 pixels
+Total cows detected: 44
+Best performing model: YOLOv8 Medium (conf=0.1)
+
+Detection Details:
+------------------------------
+Cow 1:
+  Position: (925, 952) to (1069, 1054)
+  Confidence: 0.881
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 144 x 102 pixels
+  Center point: (997, 1003)
+
+Cow 2:
+  Position: (568, 1136) to (676, 1234)
+  Confidence: 0.792
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 108 x 98 pixels
+  Center point: (622, 1185)
+
+Cow 3:
+  Position: (655, 1086) to (727, 1156)
+  Confidence: 0.768
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 72 x 70 pixels
+  Center point: (691, 1121)
+
+Cow 4:
+  Position: (1276, 874) to (1384, 952)
+  Confidence: 0.762
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 108 x 78 pixels
+  Center point: (1330, 913)
+
+Cow 5:
+  Position: (1475, 938) to (1577, 1020)
+  Confidence: 0.734
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 102 x 82 pixels
+  Center point: (1526, 979)
+
+Cow 6:
+  Position: (2610, 1103) to (2734, 1189)
+  Confidence: 0.707
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 124 x 86 pixels
+  Center point: (2672, 1146)
+
+Cow 7:
+  Position: (734, 966) to (809, 1024)
+  Confidence: 0.691
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 75 x 58 pixels
+  Center point: (771, 995)
+
+Cow 8:
+  Position: (1823, 954) to (1929, 1006)
+  Confidence: 0.678
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 106 x 52 pixels
+  Center point: (1876, 980)
+
+Cow 9:
+  Position: (1610, 913) to (1689, 999)
+  Confidence: 0.653
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 79 x 86 pixels
+  Center point: (1649, 956)
+
+Cow 10:
+  Position: (1434, 901) to (1599, 958)
+  Confidence: 0.652
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 165 x 57 pixels
+  Center point: (1516, 929)
+
+Cow 11:
+  Position: (2552, 1046) to (2696, 1119)
+  Confidence: 0.644
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 144 x 73 pixels
+  Center point: (2624, 1082)
+
+Cow 12:
+  Position: (1206, 876) to (1275, 944)
+  Confidence: 0.615
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 69 x 68 pixels
+  Center point: (1240, 910)
+
+Cow 13:
+  Position: (1780, 982) to (1859, 1054)
+  Confidence: 0.607
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 79 x 72 pixels
+  Center point: (1819, 1018)
+
+Cow 14:
+  Position: (1133, 908) to (1266, 980)
+  Confidence: 0.602
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 133 x 72 pixels
+  Center point: (1199, 944)
+
+Cow 15:
+  Position: (1857, 855) to (1985, 921)
+  Confidence: 0.588
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 128 x 66 pixels
+  Center point: (1921, 888)
+
+Cow 16:
+  Position: (1925, 763) to (2029, 817)
+  Confidence: 0.587
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 104 x 54 pixels
+  Center point: (1977, 790)
+
+Cow 17:
+  Position: (2552, 855) to (2623, 934)
+  Confidence: 0.542
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 71 x 79 pixels
+  Center point: (2587, 894)
+
+Cow 18:
+  Position: (1654, 909) to (1728, 977)
+  Confidence: 0.536
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 74 x 68 pixels
+  Center point: (1691, 943)
+
+Cow 19:
+  Position: (1997, 817) to (2095, 868)
+  Confidence: 0.529
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 98 x 51 pixels
+  Center point: (2046, 842)
+
+Cow 20:
+  Position: (1344, 854) to (1465, 920)
+  Confidence: 0.502
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 121 x 66 pixels
+  Center point: (1404, 887)
+
+Cow 21:
+  Position: (2438, 863) to (2502, 957)
+  Confidence: 0.491
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 64 x 94 pixels
+  Center point: (2470, 910)
+
+Cow 22:
+  Position: (1951, 838) to (2062, 898)
+  Confidence: 0.474
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 111 x 60 pixels
+  Center point: (2006, 868)
+
+Cow 23:
+  Position: (2490, 857) to (2551, 919)
+  Confidence: 0.460
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 61 x 62 pixels
+  Center point: (2520, 888)
+
+Cow 24:
+  Position: (2304, 839) to (2406, 892)
+  Confidence: 0.424
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 102 x 53 pixels
+  Center point: (2355, 865)
+
+Cow 25:
+  Position: (2717, 1159) to (2790, 1239)
+  Confidence: 0.373
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 73 x 80 pixels
+  Center point: (2753, 1199)
+
+Cow 26:
+  Position: (1771, 813) to (1899, 919)
+  Confidence: 0.364
+  Detected by: YOLOv8 Medium
+  Box size: 128 x 106 pixels
+  Center point: (1835, 866)
+
+Cow 27:
+  Position: (1798, 1112) to (1919, 1229)
+  Confidence: 0.347
+  Detected by: YOLOv8 Medium
+  Box size: 121 x 117 pixels
+  Center point: (1858, 1170)
+
+Cow 28:
+  Position: (2155, 1068) to (2261, 1139)
+  Confidence: 0.340
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 106 x 71 pixels
+  Center point: (2208, 1103)
+
+Cow 29:
+  Position: (2356, 728) to (2456, 814)
+  Confidence: 0.320
+  Detected by: YOLOv8 Small
+  Box size: 100 x 86 pixels
+  Center point: (2406, 771)
+
+Cow 30:
+  Position: (2107, 969) to (2188, 1053)
+  Confidence: 0.314
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 81 x 84 pixels
+  Center point: (2147, 1011)
+
+Cow 31:
+  Position: (2067, 1074) to (2151, 1138)
+  Confidence: 0.307
+  Detected by: YOLOv8 Medium
+  Box size: 84 x 64 pixels
+  Center point: (2109, 1106)
+
+Cow 32:
+  Position: (2479, 751) to (2566, 813)
+  Confidence: 0.284
+  Detected by: YOLOv8 Small
+  Box size: 87 x 62 pixels
+  Center point: (2522, 782)
+
+Cow 33:
+  Position: (2189, 1012) to (2263, 1074)
+  Confidence: 0.283
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 74 x 62 pixels
+  Center point: (2226, 1043)
+
+Cow 34:
+  Position: (1687, 778) to (1834, 849)
+  Confidence: 0.248
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 147 x 71 pixels
+  Center point: (1760, 813)
+
+Cow 35:
+  Position: (1822, 758) to (2029, 852)
+  Confidence: 0.236
+  Detected by: YOLOv8 Nano (Grid)
+  Box size: 207 x 94 pixels
+  Center point: (1925, 805)
+
+Cow 36:
+  Position: (2648, 833) to (2757, 907)
+  Confidence: 0.220
+  Detected by: YOLOv8 Nano
+  Box size: 109 x 74 pixels
+  Center point: (2702, 870)
+
+Cow 37:
+  Position: (2384, 873) to (2479, 945)
+  Confidence: 0.208
+  Detected by: YOLOv8 Medium
+  Box size: 95 x 72 pixels
+  Center point: (2431, 909)
+
+Cow 38:
+  Position: (2738, 1064) to (2786, 1158)
+  Confidence: 0.197
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 48 x 94 pixels
+  Center point: (2762, 1111)
+
+Cow 39:
+  Position: (2543, 1043) to (2800, 1232)
+  Confidence: 0.178
+  Detected by: YOLOv8 Nano
+  Box size: 257 x 189 pixels
+  Center point: (2671, 1137)
+
+Cow 40:
+  Position: (1825, 771) to (1886, 821)
+  Confidence: 0.160
+  Detected by: YOLOv8 Medium (Grid)
+  Box size: 61 x 50 pixels
+  Center point: (1855, 796)
+
+Cow 41:
+  Position: (1897, 800) to (1998, 856)
+  Confidence: 0.116
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 101 x 56 pixels
+  Center point: (1947, 828)
+
+Cow 42:
+  Position: (1253, 897) to (1324, 956)
+  Confidence: 0.115
+  Detected by: YOLOv8 Small
+  Box size: 71 x 59 pixels
+  Center point: (1288, 926)
+
+Cow 43:
+  Position: (1758, 1491) to (1968, 1731)
+  Confidence: 0.114
+  Detected by: YOLOv8 Small
+  Box size: 210 x 240 pixels
+  Center point: (1863, 1611)
+
+Cow 44:
+  Position: (1853, 761) to (1929, 826)
+  Confidence: 0.110
+  Detected by: YOLOv8 Small (Grid)
+  Box size: 76 x 65 pixels
+  Center point: (1891, 793)
+
+
+Files generated:
+- detection_results_enhanced.json (detailed evaluation format)
+- api_detection_results_enhanced.json (API-compatible format)
+- detection_summary_enhanced.txt (human-readable summary)
+- annotated_result_enhanced.jpg (visual result)
+- detection_analysis_enhanced.png (analysis visualization)

@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 from ultralytics import YOLO
 from fastapi import UploadFile
 
@@ -10,7 +10,6 @@ from ..config import (
 
 # Import enhanced detection functions
 from .cow_counter_enhanced import enhanced_cow_detection
-from .cow_counter_ultra import detect_cows_aggressive
 
 # Global variable to store the YOLO model (loaded once)
 model: Optional[YOLO] = None
@@ -67,47 +66,6 @@ def detect_cows_enhanced(image_path: Path, output_dir: Path) -> Dict[str, Any]:
             "analysis_complete": False,
             "message": f"Enhanced detection failed: {str(e)}",
             "method": "enhanced"
-        }
-
-
-def detect_cows_ultra_aggressive(image_path: Path, output_dir: Path) -> Dict[str, Any]:
-    """
-    Ultra-aggressive cow detection with very low thresholds.
-    """
-    try:
-        count, detections = detect_cows_aggressive(
-            str(image_path), str(output_dir))
-
-        # Convert detections to expected format
-        formatted_detections = []
-        for detection in detections:
-            x1, y1, x2, y2 = detection['bbox']
-            formatted_detections.append({
-                "confidence": detection['confidence'],
-                "bbox": [float(x1), float(y1), float(x2), float(y2)],
-                "class_name": detection.get('class_name', 'cow'),
-                "class_id": detection.get('class_id', COW_CLASS_ID),
-                "model": detection.get('model', 'ultra'),
-                "size": detection.get('size', 0)
-            })
-
-        return {
-            "total_cows": count,
-            "detections": formatted_detections,
-            "image_path": str(image_path),
-            "analysis_complete": True,
-            "message": f"Ultra-aggressive detection found {count} cows",
-            "method": "ultra"
-        }
-
-    except Exception as e:
-        return {
-            "total_cows": 0,
-            "detections": [],
-            "image_path": str(image_path),
-            "analysis_complete": False,
-            "message": f"Ultra-aggressive detection failed: {str(e)}",
-            "method": "ultra"
         }
 
 

@@ -62,7 +62,7 @@ export function UploadArea({
               <h4 className="font-bold text-foreground mb-1">
                 {uploadLoading ? "Processing..." : "Choose File"}
               </h4>
-              <p className="text-sm text-muted-foreground">JPG, JPEG, PNG • Max 50MB</p>
+              <p className="text-sm text-muted-foreground">JPG, JPEG, PNG • Max 10MB</p>
             </div>
             <Button
               size="sm"

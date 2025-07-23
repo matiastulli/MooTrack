@@ -20,7 +20,6 @@ def enhanced_cow_detection(image_path, output_dir="output"):
     # Try multiple models for better detection
     models_to_try = [
         ('yolov8m.pt', 'YOLOv8 Medium'),
-        ('yolov8s.pt', 'YOLOv8 Small'),
         ('yolov8n.pt', 'YOLOv8 Nano')
     ]
 

@@ -241,8 +241,8 @@ export function ImagePreview({
               <div className="flex flex-col items-center gap-4">
                 <div className="w-12 h-12 border-3 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
                 <div className="text-center">
-                  <span className="text-xl font-bold block text-primary-foreground">Analyzing Image...</span>
-                  <span className="text-sm text-primary-foreground/90">Please wait while we detect cows</span>
+                  <span className="text-xl font-bold block text-white">Analyzing Image...</span>
+                  <span className="text-sm text-white/90">Please wait while we detect cows</span>
                 </div>
               </div>
             </div>

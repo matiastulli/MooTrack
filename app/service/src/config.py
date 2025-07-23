@@ -11,13 +11,13 @@ PORT = int(os.getenv("MOOTRACK_PORT", "8000"))
 RELOAD = os.getenv("MOOTRACK_RELOAD", "True").lower() == "true"
 
 # Model Configuration
-YOLO_MODEL = os.getenv("YOLO_MODEL", "yolov8n.pt")  # Options: yolov8n.pt, yolov8s.pt, yolov8m.pt
+YOLO_MODEL = os.getenv("YOLO_MODEL", "yolov8m.pt")  # Options: yolov8n.pt, yolov8s.pt, yolov8m.pt
 DEFAULT_CONFIDENCE = float(os.getenv("DEFAULT_CONFIDENCE", "0.3"))
 MAX_CONFIDENCE = float(os.getenv("MAX_CONFIDENCE", "1.0"))
 MIN_CONFIDENCE = float(os.getenv("MIN_CONFIDENCE", "0.01"))
 
 # File Configuration
-MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", "50")) * 1024 * 1024  # 50MB default
+MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", "10")) * 1024 * 1024  # 10MB default
 ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ".jpg,.jpeg,.png").split(",")
 
 # Directory Configuration

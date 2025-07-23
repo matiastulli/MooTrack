@@ -127,11 +127,11 @@ export default function MainApp() {
           processedFile = await compressImage(file);
         }
 
-        // Validate final file size (50MB limit)
-        if (processedFile.size > 50 * 1024 * 1024) {
+        // Validate final file size (10MB limit)
+        if (processedFile.size > 10 * 1024 * 1024) {
           setUploadStatus({
             type: "error",
-            message: "File size must be less than 50MB. Please choose a smaller image.",
+            message: "File size must be less than 10MB. Please choose a smaller image.",
           })
           return;
         }

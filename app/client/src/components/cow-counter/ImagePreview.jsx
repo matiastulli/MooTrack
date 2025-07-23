@@ -16,6 +16,7 @@ export function ImagePreview({
   handleImageLoad,
   toggleDetectionSelection,
   getScaledBoundingBox,
+  confidenceFilter,
 }) {
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -116,7 +117,12 @@ export function ImagePreview({
                 )}
               >
                 <span className="mr-2">🐄</span>
-                {detectionResults.total_cows} detected
+                {detectionResults.detections.filter(d => d.confidence >= confidenceFilter / 100).length} detected
+                {detectionResults.detections.filter(d => d.confidence >= confidenceFilter / 100).length !== detectionResults.total_cows && (
+                  <span className="ml-1 text-xs text-muted-foreground">
+                    / {detectionResults.total_cows} total
+                  </span>
+                )}
               </Badge>
             )}
           </div>
@@ -186,17 +192,20 @@ export function ImagePreview({
                 transformOrigin: 'center'
               }}
             >
-              {detectionResults.detections.map((detection, index) => {
-                const [x1, y1, x2, y2] = getScaledBoundingBox(detection.bbox)
-                const isSelected = selectedDetections.has(index)
+              {detectionResults.detections
+                .map((detection, originalIndex) => ({ detection, originalIndex }))
+                .filter(({ detection }) => detection.confidence >= confidenceFilter / 100)
+                .map(({ detection, originalIndex }) => {
+                  const [x1, y1, x2, y2] = getScaledBoundingBox(detection.bbox)
+                  const isSelected = selectedDetections.has(originalIndex)
 
-                return (
-                  <div
-                    key={index}
-                    className={cn(
-                      "absolute border-3 cursor-pointer transition-all duration-200 rounded-lg pointer-events-auto",
-                      isSelected
-                        ? "border-primary bg-primary/15 shadow-lg"
+                  return (
+                    <div
+                      key={originalIndex}
+                      className={cn(
+                        "absolute border-3 cursor-pointer transition-all duration-200 rounded-lg pointer-events-auto",
+                        isSelected
+                          ? "border-primary bg-primary/15 shadow-lg"
                         : "border-yellow-400 bg-yellow-400/10 hover:border-primary/70",
                     )}
                     style={{
@@ -205,8 +214,8 @@ export function ImagePreview({
                       width: `${x2 - x1}px`,
                       height: `${y2 - y1}px`,
                     }}
-                    onClick={() => toggleDetectionSelection(index)}
-                    title={`Cow #${index + 1} - ${(detection.confidence * 100).toFixed(1)}% confidence`}
+                    onClick={() => toggleDetectionSelection(originalIndex)}
+                    title={`Cow #${originalIndex + 1} - ${(detection.confidence * 100).toFixed(1)}% confidence`}
                   >
                     {/* Enhanced Label */}
                     <div
@@ -215,7 +224,7 @@ export function ImagePreview({
                         isSelected ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary border border-primary/20",
                       )}
                     >
-                      <span>#{index + 1}</span>
+                      <span>#{originalIndex + 1}</span>
                       <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-md">
                         {(detection.confidence * 100).toFixed(0)}%
                       </span>

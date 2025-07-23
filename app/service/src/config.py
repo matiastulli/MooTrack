@@ -4,6 +4,12 @@ Simple, environment-based configuration following KISS principle.
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+API_KEY_INFERENCE_SDK = os.getenv("API_KEY_INFERENCE_SDK", None)
 
 # Server Configuration
 HOST = os.getenv("MOOTRACK_HOST", "0.0.0.0")
@@ -39,14 +45,6 @@ API_VERSION = "1.0.0"
 
 # Detection Classes (COCO dataset)
 COW_CLASS_ID = 21
-ANIMAL_CLASSES = {
-    21: "cow",
-    # Add other animal classes if needed in the future
-    # 16: "dog",
-    # 17: "horse", 
-    # 18: "sheep",
-    # 19: "cat"
-}
 
 def get_config_summary():
     """Return a summary of current configuration"""

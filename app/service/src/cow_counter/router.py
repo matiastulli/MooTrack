@@ -4,7 +4,6 @@ FastAPI router for cow detection endpoints.
 import base64
 import io
 from fastapi import APIRouter, HTTPException, Body
-from PIL import Image
 
 # Import schemas
 from .schema import (
@@ -13,8 +12,7 @@ from .schema import (
 
 # Import services
 from .service import (
-    detect_cows_enhanced,
-    load_model
+    detect_cows_enhanced
 )
 
 # Import configuration
@@ -44,14 +42,6 @@ async def detect_cows_from_file(
             raise HTTPException(
                 status_code=400, detail=f"Invalid base64 content: {str(e)}")
 
-        # Convert to PIL Image to validate it's a valid image
-        try:
-            img = Image.open(io.BytesIO(image_data))
-            img.verify()  # Verify it's a valid image
-        except Exception as e:
-            raise HTTPException(
-                status_code=400, detail=f"Invalid image content: {str(e)}")
-
         # Save the decoded image
         file_path = IMAGES_DIR / file_name
         with open(file_path, "wb") as f:
@@ -74,7 +64,7 @@ async def detect_cows_from_file(
             raise HTTPException(status_code=404, detail="Image file not found")
 
         if detection_method == "enhanced":
-            result = detect_cows_enhanced(file_path, output_directory)
+            result = detect_cows_enhanced(file_path)
         else:
             raise HTTPException(
                 status_code=400, detail="Invalid detection method specified")
@@ -91,13 +81,3 @@ async def detect_cows_from_file(
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Detection failed: {str(e)}")
-
-
-# Initialize model on module load
-def initialize_model():
-    """Initialize the YOLO model"""
-    load_model()
-
-
-# Call initialization
-initialize_model()

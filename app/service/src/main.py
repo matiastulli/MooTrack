@@ -16,7 +16,6 @@ from src.config import (
 
 # Import the cow detection router
 from src.cow_counter.router import router as cow_router
-from src.cow_counter.service import load_model
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -74,7 +73,6 @@ async def get_config():
 async def startup_event():
     """Load model on startup"""
     print("🚀 Starting MooTrack API...")
-    load_model()
     print("✅ MooTrack API ready!")
 
 if __name__ == "__main__":

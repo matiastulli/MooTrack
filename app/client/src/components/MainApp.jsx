@@ -37,6 +37,7 @@ export default function MainApp() {
   const [imageNaturalDimensions, setImageNaturalDimensions] = useState({ width: 0, height: 0 })
   const [imageDisplayDimensions, setImageDisplayDimensions] = useState({ width: 0, height: 0 })
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true)
+  const [confidenceFilter, setConfidenceFilter] = useState(20) // Default to 20%
   const [isUploadCollapsed, setIsUploadCollapsed] = useState(false)
   const [isResultsCollapsed, setIsResultsCollapsed] = useState(false)
   const [isDetectionsCollapsed, setIsDetectionsCollapsed] = useState(false)
@@ -170,6 +171,16 @@ export default function MainApp() {
   }
 
   const selectAllDetections = () => {
+    if (detectionResults?.detections) {
+      const filteredIndices = detectionResults.detections
+        .map((detection, index) => ({ detection, index }))
+        .filter(({ detection }) => detection.confidence >= confidenceFilter / 100)
+        .map(({ index }) => index)
+      setSelectedDetections(new Set(filteredIndices))
+    }
+  }
+
+  const selectAllOriginalDetections = () => {
     if (detectionResults?.detections) {
       setSelectedDetections(new Set(detectionResults.detections.map((_, index) => index)))
     }
@@ -321,6 +332,8 @@ export default function MainApp() {
               toggleDetectionSelection={toggleDetectionSelection}
               selectAllDetections={selectAllDetections}
               deselectAllDetections={deselectAllDetections}
+              confidenceFilter={confidenceFilter}
+              setConfidenceFilter={setConfidenceFilter}
             />
             </div>
           </div>
@@ -342,6 +355,7 @@ export default function MainApp() {
               handleImageLoad={handleImageLoad}
               toggleDetectionSelection={toggleDetectionSelection}
               getScaledBoundingBox={getScaledBoundingBox}
+              confidenceFilter={confidenceFilter}
             />
           </div>
         </div>

@@ -11,8 +11,15 @@ export function DetectionList({
   toggleDetectionSelection,
   selectAllDetections,
   deselectAllDetections,
+  confidenceFilter,
+  setConfidenceFilter,
 }) {
   if (!detectionResults?.detections || detectionResults.detections.length === 0) return null
+
+  // Filter detections based on confidence threshold
+  const filteredDetections = detectionResults.detections.filter(
+    detection => detection.confidence >= confidenceFilter / 100
+  )
 
   return (
     <Card className="shadow-comfortable border-comfortable">
@@ -28,7 +35,7 @@ export function DetectionList({
             </div>
             <div className="flex items-center gap-3">
               <Badge variant="outline" size="sm" className="bg-muted/50 border-border/50">
-                {selectedDetections.size}/{detectionResults.detections.length}
+                {selectedDetections.size}/{filteredDetections.length}
               </Badge>
               <Button
                 variant="ghost"
@@ -45,12 +52,43 @@ export function DetectionList({
         "space-y-4 transition-all duration-300",
         isCollapsed && "hidden"
       )}>
+        {/* Confidence Filter Slider */}
+        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-foreground">Confidence Filter</span>
+            <Badge variant="outline" size="sm" className="bg-primary/10 border-primary/20 text-primary">
+              {confidenceFilter}%
+            </Badge>
+          </div>
+          <div className="space-y-2">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={confidenceFilter}
+              onChange={(e) => setConfidenceFilter(Number(e.target.value))}
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer slider"
+              style={{
+                background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${confidenceFilter}%, hsl(var(--muted)) ${confidenceFilter}%, hsl(var(--muted)) 100%)`
+              }}
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span className="text-foreground font-medium">
+                {filteredDetections.length} / {detectionResults.detections.length} detections
+              </span>
+              <span>100%</span>
+            </div>
+          </div>
+        </div>
+
         <div className="flex gap-1 justify-end">
           <Button
             variant="outline"
             size="sm"
             onClick={selectAllDetections}
-            disabled={selectedDetections.size === detectionResults.detections.length}
+            disabled={selectedDetections.size === filteredDetections.length}
             className="text-xs px-2 bg-transparent text-foreground/90"
           >
             All
@@ -65,57 +103,46 @@ export function DetectionList({
             None
           </Button>
         </div>
-        <div className="space-y-2 max-h-[calc(100vh-600px)] overflow-y-auto no-scrollbar">
-          {detectionResults.detections.map((detection, index) => {
-            const isSelected = selectedDetections.has(index)
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "p-3 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                  isSelected
-                    ? "bg-primary/10 border-primary"
-                    : "bg-muted/30 border-border hover:border-primary/50",
-                )}
-                onClick={() => toggleDetectionSelection(index)}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={cn(
-                        "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                        isSelected ? "bg-primary border-primary" : "bg-card border-muted",
-                      )}
-                    >
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-card"></div>}
-                    </div>
-                    <span className="font-medium text-foreground">Cow #{index + 1}</span>
-                  </div>
-                  <Badge 
-                    variant="outline" 
-                    size="sm" 
-                    className={cn(
-                      "text-xs font-medium px-2 py-0.5",
-                      "bg-primary/5 border-primary/20 text-primary",
-                      "transition-colors duration-200"
-                    )}
-                  >
-                    {(detection.confidence * 100).toFixed(1)}%
-                  </Badge>
-                </div>
-                <div className="text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Position:</span>
-                    <span className="text-foreground/90 font-medium">({Math.round(detection.bbox[0])}, {Math.round(detection.bbox[1])})</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">Size:</span>
-                    <span className="text-foreground/90 font-medium">{Math.round(detection.bbox[2] - detection.bbox[0])} × {Math.round(detection.bbox[3] - detection.bbox[1])} px</span>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+        {/* Detection Dropdown */}
+        <div className="space-y-2">
+          <select
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer hover:border-primary/50"
+            onChange={(e) => {
+              const selectedIndex = Number(e.target.value)
+              if (!isNaN(selectedIndex) && selectedIndex >= 0) {
+                toggleDetectionSelection(selectedIndex)
+              }
+            }}
+            value=""
+          >
+            <option value="" disabled>
+              Select a detection to toggle ({filteredDetections.length} available)
+            </option>
+            {filteredDetections.map((detection, originalIndex) => {
+              // Find the original index in the full detections array
+              const detectionIndex = detectionResults.detections.findIndex(d => d === detection)
+              const isSelected = selectedDetections.has(detectionIndex)
+              
+              return (
+                <option 
+                  key={detectionIndex} 
+                  value={detectionIndex}
+                  className={isSelected ? "bg-primary/10" : ""}
+                >
+                  {isSelected ? "✓ " : "○ "}Cow #{detectionIndex + 1} - {(detection.confidence * 100).toFixed(1)}% confidence - Position: ({Math.round(detection.bbox[0])}, {Math.round(detection.bbox[1])}) - Size: {Math.round(detection.bbox[2] - detection.bbox[0])} × {Math.round(detection.bbox[3] - detection.bbox[1])} px
+                </option>
+              )
+            })}
+          </select>
+          
+          {/* Quick Stats */}
+          <div className="text-xs text-muted-foreground text-center">
+            {selectedDetections.size > 0 && (
+              <span>
+                {selectedDetections.size} detection{selectedDetections.size !== 1 ? 's' : ''} selected
+              </span>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

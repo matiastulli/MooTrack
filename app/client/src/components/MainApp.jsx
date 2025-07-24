@@ -103,6 +103,9 @@ export default function MainApp() {
           message: `Detection failed: ${response.error}`,
         })
       } else {
+        console.log('Detection API Response:', response)
+        console.log('First detection format:', response.detections?.[0])
+        
         setUploadStatus({
           type: "success",
           message: `Analysis complete! Found ${response.total_cows} cow(s)`,
@@ -220,14 +223,27 @@ export default function MainApp() {
 
   const handleImageLoad = (event) => {
     const img = event.target
-    setImageNaturalDimensions({
+    const naturalDimensions = {
       width: img.naturalWidth,
       height: img.naturalHeight,
-    })
-    setImageDisplayDimensions({
+    }
+    const displayDimensions = {
       width: img.clientWidth,
       height: img.clientHeight,
+    }
+    
+    setImageNaturalDimensions(naturalDimensions)
+    setImageDisplayDimensions(displayDimensions)
+    
+    console.log('Image dimensions:', {
+      natural: naturalDimensions,
+      display: displayDimensions,
+      scaleX: displayDimensions.width / naturalDimensions.width,
+      scaleY: displayDimensions.height / naturalDimensions.height
     })
+    
+    // Store natural dimensions globally for debugging
+    window.imageNaturalDimensions = naturalDimensions
   }
 
   const getScaledBoundingBox = (bbox) => {

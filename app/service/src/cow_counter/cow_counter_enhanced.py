@@ -22,7 +22,7 @@ def analyze_image_and_count_cows(image_path: str):
     with CLIENT.use_configuration(config):
         result = CLIENT.run_workflow(
             workspace_name="testing-mel1t",
-            workflow_id="my-workflow",
+            workflow_id="detect-count-and-visualize",
             images={"image": image_path},
             use_cache=True  # cache workflow definition for 15 minutes
         )
@@ -37,7 +37,6 @@ def analyze_image_and_count_cows(image_path: str):
     detections = []
     for pred in predictions:
         detection = {
-            "class": pred["class"],
             "confidence": pred["confidence"],
             "bbox": [
                 pred["x"] - pred["width"] / 2,  # x1 (left)
@@ -45,8 +44,10 @@ def analyze_image_and_count_cows(image_path: str):
                 pred["x"] + pred["width"] / 2,  # x2 (right)
                 pred["y"] + pred["height"] / 2   # y2 (bottom)
             ],
-            "detection_id": pred.get("detection_id", ""),
-            "class_id": pred.get("class_id", 0)
+            "class_name": pred.get("class", "cow"),
+            "class_id": pred.get("class_id", 0),
+            "model": "roboflow",
+            "size": pred.get("width", 0) * pred.get("height", 0)  # Area as size
         }
         detections.append(detection)
 

@@ -186,9 +186,14 @@ export function ImagePreview({
           {/* Enhanced Bounding Boxes */}
           {detectionResults?.detections && showBoundingBoxes && (
             <div 
-              className="absolute inset-0 pointer-events-none"
+              className="absolute pointer-events-none"
               style={{
-                transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                // Position relative to the displayed image, not the container
+                left: '50%',
+                top: '50%',
+                width: `${imageDisplayDimensions.width}px`,
+                height: `${imageDisplayDimensions.height}px`,
+                transform: `translate(-50%, -50%) scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
                 transformOrigin: 'center'
               }}
             >
@@ -196,8 +201,58 @@ export function ImagePreview({
                 .map((detection, originalIndex) => ({ detection, originalIndex }))
                 .filter(({ detection }) => detection.confidence >= confidenceFilter / 100)
                 .map(({ detection, originalIndex }) => {
-                  const [x1, y1, x2, y2] = getScaledBoundingBox(detection.bbox)
+                  // Debug logging
+                  if (originalIndex === 0) {
+                    console.log('Detection format debug:', {
+                      detection,
+                      imageDisplayDimensions,
+                      imageNaturalDimensions: window.imageNaturalDimensions
+                    });
+                  }
+                  
+                  // Handle different bbox formats
+                  let bbox;
+                  if (detection.bbox && Array.isArray(detection.bbox)) {
+                    // Standard [x1, y1, x2, y2] format
+                    bbox = detection.bbox;
+                    if (originalIndex === 0) {
+                      console.log(`Detection ${originalIndex}: Using standard bbox format:`, bbox);
+                    }
+                  } else if (detection.x !== undefined && detection.y !== undefined && 
+                           detection.width !== undefined && detection.height !== undefined) {
+                    // Roboflow format: {x, y, width, height} where x,y are center coordinates
+                    bbox = [
+                      detection.x - detection.width / 2,   // x1 (left)
+                      detection.y - detection.height / 2,  // y1 (top)
+                      detection.x + detection.width / 2,   // x2 (right)
+                      detection.y + detection.height / 2   // y2 (bottom)
+                    ];
+                    if (originalIndex === 0) {
+                      console.log(`Detection ${originalIndex}: Converted from Roboflow format:`, {
+                        original: { x: detection.x, y: detection.y, width: detection.width, height: detection.height },
+                        converted: bbox
+                      });
+                    }
+                  } else {
+                    // Fallback - skip this detection if format is unrecognized
+                    console.warn('Unrecognized detection format:', detection);
+                    return null;
+                  }
+                  
+                  const [x1, y1, x2, y2] = getScaledBoundingBox(bbox)
                   const isSelected = selectedDetections.has(originalIndex)
+                  
+                  // Log only for first detection to avoid spam
+                  if (originalIndex === 0) {
+                    console.log(`Detection ${originalIndex}: Scaled bbox:`, { 
+                      x1, y1, x2, y2, 
+                      width: x2-x1, 
+                      height: y2-y1,
+                      imageDisplayDimensions,
+                      percentX1: (x1 / imageDisplayDimensions.width * 100).toFixed(2),
+                      percentY1: (y1 / imageDisplayDimensions.height * 100).toFixed(2)
+                    });
+                  }
 
                   return (
                     <div
@@ -230,8 +285,8 @@ export function ImagePreview({
                       Cow {originalIndex + 1}
                     </div>
                   </div>
-                )
-              })}
+                  )
+                }).filter(Boolean)}
             </div>
           )}
 

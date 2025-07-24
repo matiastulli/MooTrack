@@ -1,4 +1,3 @@
-import os
 from inference_sdk import InferenceHTTPClient
 from inference_sdk.http.entities import InferenceConfiguration
 
@@ -10,6 +9,7 @@ CLIENT = InferenceHTTPClient(
     api_key=API_KEY_INFERENCE_SDK
 )
 
+
 def analyze_image_and_count_cows(image_path: str):
     """
     Analyze the image and count cows using the enhanced methodology.
@@ -18,17 +18,21 @@ def analyze_image_and_count_cows(image_path: str):
 
     # Configure client with 0% confidence threshold
     config = InferenceConfiguration(confidence_threshold=0)
-    
+
     with CLIENT.use_configuration(config):
-        result = CLIENT.infer(image_path,
-                              model_id="aerial-cow-detection-4psqc/2")
+        result = CLIENT.run_workflow(
+            workspace_name="testing-mel1t",
+            workflow_id="my-workflow",
+            images={"image": image_path},
+            use_cache=True  # cache workflow definition for 15 minutes
+        )
 
     # Extract predictions from the response
-    predictions = result.get("predictions", [])
-    
+    predictions = result[0]["predictions"].get("predictions", [])
+
     # Count the number of cow detections
     cow_count = len(predictions)
-    
+
     # Convert predictions to the expected detection format
     detections = []
     for pred in predictions:

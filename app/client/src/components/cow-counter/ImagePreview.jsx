@@ -203,10 +203,10 @@ export function ImagePreview({
                     <div
                       key={originalIndex}
                       className={cn(
-                        "absolute border-3 cursor-pointer transition-all duration-200 rounded-lg pointer-events-auto",
+                        "absolute border-2 cursor-pointer transition-all duration-200 pointer-events-auto group",
                         isSelected
-                          ? "border-primary bg-primary/15 shadow-lg"
-                        : "border-yellow-400 bg-yellow-400/10 hover:border-primary/70",
+                          ? "border-violet-500"
+                        : "border-violet-400 hover:border-violet-600",
                     )}
                     style={{
                       left: `${x1}px`,
@@ -217,27 +217,17 @@ export function ImagePreview({
                     onClick={() => toggleDetectionSelection(originalIndex)}
                     title={`Cow #${originalIndex + 1} - ${(detection.confidence * 100).toFixed(1)}% confidence`}
                   >
-                    {/* Enhanced Label */}
+                    {/* Cow Number - Show on Hover */}
                     <div
                       className={cn(
-                        "absolute -top-8 left-0 px-2 py-1 rounded-lg text-sm font-bold shadow-md flex items-center gap-2",
-                        isSelected ? "bg-primary text-primary-foreground" : "bg-primary/10 text-primary border border-primary/20",
+                        "absolute -top-6 left-0 px-1.5 py-0.5 rounded text-xs font-medium transition-all duration-200",
+                        "opacity-0 group-hover:opacity-100",
+                        isSelected 
+                          ? "bg-violet-600 text-white" 
+                          : "bg-violet-500 text-white",
                       )}
                     >
-                      <span>#{originalIndex + 1}</span>
-                      <span className="text-xs bg-primary/20 px-1.5 py-0.5 rounded-md">
-                        {(detection.confidence * 100).toFixed(0)}%
-                      </span>
-                    </div>
-
-                    {/* Selection Indicator */}
-                    <div
-                      className={cn(
-                        "absolute top-1 right-1 w-5 h-5 rounded-full border-2 flex items-center justify-center shadow-md",
-                        isSelected ? "bg-primary border-primary-foreground" : "bg-white border-yellow-400",
-                      )}
-                    >
-                      {isSelected && <div className="w-2 h-2 rounded-full bg-primary-foreground"></div>}
+                      Cow {originalIndex + 1}
                     </div>
                   </div>
                 )

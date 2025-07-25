@@ -256,27 +256,26 @@ export default function MainApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Enhanced Header with better spacing */}
-      <header className="bg-card/90 backdrop-blur-sm border-b-2 border-border shadow-comfortable sticky top-0 z-50">
-        <div className="px-4 py-3">
+      <header className="bg-card/90 backdrop-blur-sm shadow-comfortable sticky top-0 z-50">
+        <div className="px-8 py-2">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-2xl p-2 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 border-2 border-primary/20 shadow-comfortable">
+            <div className="flex flex-row items-center gap-3">
+              <div className="text-2xl p-1 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-comfortable">
                 🐄
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-primary mb-2">MooTrack</h1>
+                <h1 className="text-3xl font-bold text-primary leading-[44px]">MooTrack</h1>
               </div>
             </div>
-            
             <Button
               variant="outline"
               size="sm"
               onClick={toggleTheme}
               className={cn(
                 "w-9 h-9 p-0 rounded-full",
-                "border-2 border-border bg-background hover:bg-muted",
+                "bg-background hover:bg-muted",
                 "transition-all duration-300"
               )}
             >
@@ -291,21 +290,15 @@ export default function MainApp() {
         </div>
       </header>
 
-      {/* Main Content - Image-Centered Layout */}
-      <main className="max-w-full mx-auto px-4 py-3">
-        <div className={cn(
-          "flex gap-4 h-[calc(100vh-140px)]",
-          "relative"
-        )}>
-          {/* Left Sidebar - Controls Column */}
+      {/* Main Content - Centered Image Layout */}
+      <main className="flex-1 flex flex-col items-center justify-center">
+        <div className="relative w-full h-full flex flex-row items-center justify-center flex-1">
+          {/* Sidebar - Floating Controls */}
           <div className={cn(
-            "transition-all duration-300 ease-in-out",
-            "absolute md:relative",
-            "z-40 h-full bg-background/95 backdrop-blur-sm",
-            isSidebarCollapsed ? 
-              "-translate-x-full md:translate-x-0 md:w-12" : 
-              "translate-x-0 w-[85vw] md:w-80",
-            "border-r border-border"
+            "fixed left-0 top-0 md:static md:relative md:h-full md:flex md:flex-col md:justify-center md:items-start",
+            "z-40 bg-background/95 backdrop-blur-sm shadow-lg",
+            isSidebarCollapsed ? "-translate-x-full md:translate-x-0 md:w-12" : "translate-x-0 w-[85vw] md:w-80",
+            "rounded-r-2xl md:rounded-2xl transition-all duration-300 ease-in-out"
           )}>
             {/* Collapse Toggle Button */}
             <Button
@@ -313,7 +306,7 @@ export default function MainApp() {
               size="sm"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className={cn(
-                "absolute -right-12 md:-right-3 top-1/2 z-50 h-24 w-6 py-2 px-0 border shadow-md flex flex-col items-center justify-center gap-1",
+                "absolute -right-12 md:-right-3 top-1/2 z-50 h-24 w-6 py-2 px-0 shadow-md flex flex-col items-center justify-center gap-1",
                 "bg-card hover:bg-muted transition-colors",
                 "rounded-r-full md:rounded-full"
               )}
@@ -325,62 +318,57 @@ export default function MainApp() {
                 ◀
               </div>
             </Button>
-            
             <div className={cn(
               "space-y-4 overflow-y-auto no-scrollbar h-full transition-all duration-300",
               "p-4", // Add padding for better mobile spacing
               isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
             )}>
-            {/* Upload Section */}
-            <UploadArea
-              isCollapsed={isUploadCollapsed}
-              setIsCollapsed={setIsUploadCollapsed}
-              uploadLoading={uploadLoading}
-              imagePreview={imagePreview}
-              handleFileChange={handleFileChange}
-              selectedDetectionMethod={selectedDetectionMethod}
-              handleDetectionMethodChange={handleDetectionMethodChange}
-              uploadStatus={uploadStatus}
-              detectionResults={detectionResults}
-              resetAnalysis={resetAnalysis}
-            />
-
-            {/* Results Summary & Detections Combined */}
-            <ResultsSummary
-              isCollapsed={isResultsCollapsed}
-              setIsCollapsed={setIsResultsCollapsed}
-              detectionResults={detectionResults}
-              selectedDetections={selectedDetections}
-              showBoundingBoxes={showBoundingBoxes}
-              setShowBoundingBoxes={setShowBoundingBoxes}
-              confidenceFilter={confidenceFilter}
-              setConfidenceFilter={setConfidenceFilter}
-              toggleDetectionSelection={toggleDetectionSelection}
-              selectAllDetections={selectAllDetections}
-              deselectAllDetections={deselectAllDetections}
-            />
+              {/* Upload Section */}
+              <UploadArea
+                isCollapsed={isUploadCollapsed}
+                setIsCollapsed={setIsUploadCollapsed}
+                uploadLoading={uploadLoading}
+                imagePreview={imagePreview}
+                handleFileChange={handleFileChange}
+                selectedDetectionMethod={selectedDetectionMethod}
+                handleDetectionMethodChange={handleDetectionMethodChange}
+                uploadStatus={uploadStatus}
+                detectionResults={detectionResults}
+                resetAnalysis={resetAnalysis}
+              />
+              {/* Results Summary & Detections Combined */}
+              <ResultsSummary
+                isCollapsed={isResultsCollapsed}
+                setIsCollapsed={setIsResultsCollapsed}
+                detectionResults={detectionResults}
+                selectedDetections={selectedDetections}
+                showBoundingBoxes={showBoundingBoxes}
+                setShowBoundingBoxes={setShowBoundingBoxes}
+                confidenceFilter={confidenceFilter}
+                setConfidenceFilter={setConfidenceFilter}
+                toggleDetectionSelection={toggleDetectionSelection}
+                selectAllDetections={selectAllDetections}
+                deselectAllDetections={deselectAllDetections}
+              />
             </div>
           </div>
-
-          {/* Right Area - Large Image Display */}
-          <div className={cn(
-            "flex-1 flex flex-col transition-all duration-300",
-            "w-full", // Ensure full width
-            isSidebarCollapsed ? "md:ml-2" : "md:ml-0" // Adjust margin only on desktop
-          )}>
-            <ImagePreview
-              imagePreview={imagePreview}
-              uploadedFile={uploadedFile}
-              detectionResults={detectionResults}
-              uploadLoading={uploadLoading}
-              showBoundingBoxes={showBoundingBoxes}
-              selectedDetections={selectedDetections}
-              imageDisplayDimensions={imageDisplayDimensions}
-              handleImageLoad={handleImageLoad}
-              toggleDetectionSelection={toggleDetectionSelection}
-              getScaledBoundingBox={getScaledBoundingBox}
-              confidenceFilter={confidenceFilter}
-            />
+          {/* Centered Image Display */}
+          <div className="flex-1 flex flex-col items-center justify-center min-h-0 w-full">
+            <div className="flex-1 flex flex-col justify-center items-center min-h-0 w-full max-w-[98vw] md:max-w-[1800px]">
+              <ImagePreview
+                imagePreview={imagePreview}
+                uploadedFile={uploadedFile}
+                detectionResults={detectionResults}
+                uploadLoading={uploadLoading}
+                showBoundingBoxes={showBoundingBoxes}
+                selectedDetections={selectedDetections}
+                imageDisplayDimensions={imageDisplayDimensions}
+                handleImageLoad={handleImageLoad}
+                toggleDetectionSelection={toggleDetectionSelection}
+                getScaledBoundingBox={getScaledBoundingBox}
+                confidenceFilter={confidenceFilter}
+              />
+            </div>
           </div>
         </div>
       </main>

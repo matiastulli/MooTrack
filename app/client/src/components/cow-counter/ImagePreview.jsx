@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils"
-import { Camera, Minus, Plus } from "lucide-react"
+import { Minus, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Badge } from "../ui/Badge"
 import { Button } from "../ui/Button"
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
+import { Card, CardContent } from "../ui/Card"
 
 export function ImagePreview({
   imagePreview,
@@ -77,15 +77,10 @@ export function ImagePreview({
   }, [])
   if (!imagePreview) {
     return (
-      <Card className="shadow-comfortable border-comfortable border-dashed h-full flex items-center justify-center">
-        <CardContent className="text-center p-16">
-          <div className="space-y-6">
-            <div className="text-8xl opacity-40">🖼️</div>
-            <h3 className="text-3xl font-bold text-foreground">Image Preview</h3>
-            <p className="text-xl text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Upload an image to see it displayed here in full size. You'll be able to clearly identify each
-              detected cow with visual indicators.
-            </p>
+      <Card className="shadow-comfortable h-full flex items-center justify-center">
+        <CardContent className="flex items-center justify-center w-full h-full">
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-8xl opacity-40">🖼️</span>
           </div>
         </CardContent>
       </Card>
@@ -93,50 +88,16 @@ export function ImagePreview({
   }
 
   return (
-    <Card className="shadow-comfortable border-comfortable h-full flex flex-col">
-      <CardHeader className="pb-4 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Camera className="w-5 h-5" />
-            Image Analysis
-          </CardTitle>
-          <div className="flex items-center gap-3">
-            {uploadedFile && (
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-              </Badge>
-            )}
-            {detectionResults && (
-              <Badge 
-                variant="outline" 
-                className={cn(
-                  "px-3 py-1 text-sm font-bold",
-                  "bg-background text-foreground border-border",
-                  "shadow-sm",
-                  "transition-colors duration-200"
-                )}
-              >
-                <span className="mr-2">🐄</span>
-                {detectionResults.detections.filter(d => d.confidence >= confidenceFilter / 100).length} detected
-                {detectionResults.detections.filter(d => d.confidence >= confidenceFilter / 100).length !== detectionResults.total_cows && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    / {detectionResults.total_cows} total
-                  </span>
-                )}
-              </Badge>
-            )}
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-4">
+    <Card className="shadow-comfortable h-full w-full flex flex-col">
+      <CardContent className="flex-1 flex flex-col p-0 w-full h-full">
         <div 
-          className="relative flex-1 flex items-center justify-center bg-muted/20 rounded-xl overflow-hidden"
+          className="relative flex-1 flex items-center justify-center w-full h-full bg-muted/10 rounded-xl overflow-hidden"
           onMouseEnter={() => setShowZoomControls(true)}
           onMouseLeave={() => setShowZoomControls(false)}
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
-          style={{ cursor: scale > 1 ? 'grab' : 'default' }}
+          style={{ cursor: scale > 1 ? 'grab' : 'default', minHeight: '70vh', minWidth: '70vw' }}
         >
           {/* Zoom Controls */}
           <div className={cn(
@@ -176,9 +137,9 @@ export function ImagePreview({
             <img
               src={imagePreview || "/placeholder.svg"}
               alt="Uploaded preview"
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full object-contain"
               onLoad={handleImageLoad}
-              style={{ maxHeight: "calc(100vh - 250px)" }}
+              style={{ maxHeight: "calc(100vh - 80px)", maxWidth: "100vw" }}
               draggable="false"
             />
           </div>

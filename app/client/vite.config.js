@@ -9,7 +9,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.ico', 'favicon-96x96.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'MooTrack',
         short_name: 'MooTrack',
@@ -17,13 +17,8 @@ export default defineConfig({
         theme_color: '#121418',
         icons: [
           {
-            src: 'favicon-16x16.png',
-            sizes: '16x16',
-            type: 'image/png'
-          },
-          {
-            src: 'favicon-32x32.png',
-            sizes: '32x32',
+            src: 'favicon-96x96.png',
+            sizes: '96x96',
             type: 'image/png'
           },
           {

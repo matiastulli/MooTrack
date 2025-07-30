@@ -21,8 +21,8 @@ def analyze_image_and_count_cows(image_path: str):
 
     with CLIENT.use_configuration(config):
         result = CLIENT.run_workflow(
-            workspace_name="testing-mel1t",
-            workflow_id="detect-count-and-visualize",
+            workspace_name="initial-5j43s",
+            workflow_id="aerial-cow-counter",
             images={"image": image_path},
             use_cache=True  # cache workflow definition for 15 minutes
         )

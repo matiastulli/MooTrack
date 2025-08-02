@@ -38,10 +38,7 @@ export function ResultsSummary({
 
   return (
     <Card className="shadow-comfortable border-comfortable">
-      <CardHeader 
-        className={cn("pb-3 cursor-pointer select-none hover:bg-muted/50")}
-        onClick={() => setIsCollapsed(!isCollapsed)}
-      >
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-between flex-1">
             <div className="flex items-center gap-2">
@@ -55,21 +52,11 @@ export function ResultsSummary({
                   <span className="ml-1 text-blue-600">+{manualDetections.length}M</span>
                 )}
               </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 md:h-8 md:w-8 p-0"
-              >
-                <div className={cn("transition-transform text-sm md:text-base", isCollapsed ? "rotate-180" : "")}>⌃</div>
-              </Button>
             </div>
           </div>
         </div>
       </CardHeader>
-      <CardContent className={cn(
-        "space-y-4 transition-all duration-300",
-        isCollapsed && "hidden"
-      )}>
+      <CardContent className="space-y-4">
         {/* Results Summary */}
         <div className="grid grid-cols-3 gap-3">
           <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">

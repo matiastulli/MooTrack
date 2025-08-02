@@ -18,34 +18,15 @@ export function UploadArea({
 }) {
   return (
     <Card className="shadow-comfortable border-comfortable">
-      <CardHeader 
-        className={cn("pb-3 cursor-pointer select-none", imagePreview && "hover:bg-muted/50")}
-        onClick={() => imagePreview && setIsCollapsed(!isCollapsed)}
-      >
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Upload className="w-5 h-5" />
             Upload Image
           </CardTitle>
-          {imagePreview && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-              onClick={(e) => {
-                e.stopPropagation()
-                setIsCollapsed(!isCollapsed)
-              }}
-            >
-              <div className={cn("transition-transform", isCollapsed ? "rotate-180" : "")}>⌃</div>
-            </Button>
-          )}
         </div>
       </CardHeader>
-      <CardContent className={cn(
-        "space-y-4 transition-all duration-300",
-        isCollapsed && "hidden"
-      )}>
+      <CardContent className="space-y-4">
         {/* Compact Upload Area */}
         <div
           className={cn(

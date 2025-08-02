@@ -331,17 +331,17 @@ export default function MainApp() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/30">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-background via-background to-secondary/30">
       {/* Enhanced Header with better spacing */}
-      <header className="bg-card/90 backdrop-blur-sm shadow-comfortable sticky top-0 z-50">
-        <div className="px-8 py-2">
+      <header className="bg-card/90 backdrop-blur-sm shadow-comfortable sticky top-0 z-50 flex-shrink-0">
+        <div className="px-6 py-1">
           <div className="flex items-center justify-between">
-            <div className="flex flex-row items-center gap-3">
-              <div className="text-2xl p-1 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-comfortable">
+            <div className="flex flex-row items-center gap-2">
+              <div className="text-lg p-1 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 shadow-comfortable">
                 🐄
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-primary leading-[44px]">MooTrack</h1>
+                <h1 className="text-xl font-bold text-primary leading-6">MooTrack</h1>
               </div>
             </div>
             <Button
@@ -349,15 +349,15 @@ export default function MainApp() {
               size="sm"
               onClick={toggleTheme}
               className={cn(
-                "w-9 h-9 p-0 rounded-full",
+                "w-8 h-8 p-0 rounded-full",
                 "bg-background hover:bg-muted",
                 "transition-all duration-300"
               )}
             >
               {theme === "light" ? (
-                <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
+                <Sun className="h-3.5 w-3.5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-foreground" />
               ) : (
-                <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
+                <Moon className="absolute h-3.5 w-3.5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-foreground" />
               )}
               <span className="sr-only">Toggle theme</span>
             </Button>
@@ -365,134 +365,129 @@ export default function MainApp() {
         </div>
       </header>
 
-      {/* Main Content - Centered Image Layout */}
-      <main className="flex-1 flex flex-col items-center justify-center">
-        <div className="relative w-full h-full flex flex-row items-center justify-center flex-1">
-          {/* Sidebar - Floating Controls */}
-          <div className={cn(
-            "fixed left-0 top-0 md:static md:relative md:h-full md:flex md:flex-col md:justify-center md:items-start",
-            "z-40 bg-background/95 backdrop-blur-sm shadow-lg",
-            isSidebarCollapsed ? "-translate-x-full md:translate-x-0 md:w-12" : "translate-x-0 w-[85vw] md:w-80",
-            "rounded-r-2xl md:rounded-2xl transition-all duration-300 ease-in-out"
-          )}>
-            {/* Collapse Toggle Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className={cn(
-                "absolute -right-12 md:-right-3 top-1/2 z-50 h-24 w-6 py-2 px-0 shadow-md flex flex-col items-center justify-center gap-1",
-                "bg-card hover:bg-muted transition-colors",
-                "rounded-r-full md:rounded-full"
-              )}
-            >
-              <div className={cn(
-                "w-4 h-4 transition-transform duration-300",
-                isSidebarCollapsed ? "rotate-180" : ""
-              )}>
-                ◀
-              </div>
-            </Button>
+      {/* Main Content - Three Column Layout */}
+      <main className="flex-1 flex overflow-hidden">
+        <div className="w-full h-full flex">
+          {/* Column 1: Navigation Icons (Narrow) */}
+          <div className="w-12 bg-card/50 border-r border-border/50 flex flex-col items-center py-3 space-y-3 flex-shrink-0">
+            {[
+              { id: "upload_image", icon: Tag, label: "Upload Image" },
+              { id: "summary", icon: BarChart3, label: "Results Summary" }
+            ].map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
+                <Button
+                  key={tab.id}
+                  variant={isActive ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "w-8 h-8 p-0 transition-all duration-200",
+                    isActive 
+                      ? "bg-primary text-primary-foreground shadow-sm" 
+                      : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                  )}
+                  title={tab.label}
+                >
+                  <Icon className="h-4 w-4" />
+                </Button>
+              )
+            })}
+          </div>
+
+          {/* Column 2: Options Panel (Medium) */}
+          <div className="relative flex flex-shrink-0">
+            {/* Always Visible Collapse Toggle Button */}
+            <div className="absolute -right-3 top-2 z-10">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="w-6 h-6 p-0 bg-background shadow-md border"
+              >
+                <div className={cn(
+                  "transition-transform duration-300 text-xs",
+                  isSidebarCollapsed ? "rotate-180" : ""
+                )}>
+                  ◀
+                </div>
+              </Button>
+            </div>
+            
+            {/* Collapsible Content */}
             <div className={cn(
-              "space-y-4 overflow-y-auto no-scrollbar h-full transition-all duration-300",
-              "p-4", // Add padding for better mobile spacing
-              isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
+              "bg-background border-r border-border/50 transition-all duration-300 overflow-hidden",
+              isSidebarCollapsed ? "w-0" : "w-72"
             )}>
-              {/* Navigation Tabs */}
-              <div className="space-y-2">
-                <h3 className="text-sm font-medium text-muted-foreground px-2">Navigation</h3>
-                <div className="grid grid-cols-1 gap-1">
-                  {[
-                    { id: "upload_image", icon: Tag, label: "Upload Image", color: "emerald" },
-                    { id: "summary", icon: BarChart3, label: "Results Summary", color: "blue" }
-                  ].map((tab) => {
-                    const Icon = tab.icon
-                    const isActive = activeTab === tab.id
-                    return (
-                      <Button
-                        key={tab.id}
-                        variant={isActive ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setActiveTab(tab.id)}
-                        className={cn(
-                          "justify-start gap-3 h-10 px-3 text-sm font-medium transition-all duration-200",
-                          isActive 
-                            ? "bg-primary text-primary-foreground shadow-sm" 
-                            : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <Icon className="h-4 w-4" />
-                        <span>{tab.label}</span>
-                      </Button>
-                    )
-                  })}
+              <div className={cn(
+                "h-full transition-all duration-300 flex flex-col",
+                isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
+              )}>
+                {/* Tab Content */}
+                <div className="px-3 pt-8 pb-3 flex-1 overflow-y-auto">
+                  {activeTab === "upload_image" && (
+                    <UploadArea
+                      isCollapsed={isUploadCollapsed}
+                      setIsCollapsed={setIsUploadCollapsed}
+                      uploadLoading={uploadLoading}
+                      imagePreview={imagePreview}
+                      handleFileChange={handleFileChange}
+                      selectedDetectionMethod={selectedDetectionMethod}
+                      handleDetectionMethodChange={handleDetectionMethodChange}
+                      uploadStatus={uploadStatus}
+                      detectionResults={detectionResults}
+                      resetAnalysis={resetAnalysis}
+                    />
+                  )}
+
+                  {activeTab === "summary" && (
+                    <ResultsSummary
+                      isCollapsed={isResultsCollapsed}
+                      setIsCollapsed={setIsResultsCollapsed}
+                      detectionResults={detectionResults}
+                      selectedDetections={selectedDetections}
+                      showBoundingBoxes={showBoundingBoxes}
+                      setShowBoundingBoxes={setShowBoundingBoxes}
+                      confidenceFilter={confidenceFilter}
+                      setConfidenceFilter={setConfidenceFilter}
+                      toggleDetectionSelection={toggleDetectionSelection}
+                      selectAllDetections={selectAllDetections}
+                      deselectAllDetections={deselectAllDetections}
+                      isManualDetectionMode={isManualDetectionMode}
+                      toggleManualDetectionMode={toggleManualDetectionMode}
+                      manualDetections={manualDetections}
+                    />
+                  )}
                 </div>
               </div>
-
-              {/* Tab Content */}
-              {activeTab === "upload_image" && (
-                <>
-                  {/* Upload Section */}
-                  <UploadArea
-                    isCollapsed={isUploadCollapsed}
-                    setIsCollapsed={setIsUploadCollapsed}
-                    uploadLoading={uploadLoading}
-                    imagePreview={imagePreview}
-                    handleFileChange={handleFileChange}
-                    selectedDetectionMethod={selectedDetectionMethod}
-                    handleDetectionMethodChange={handleDetectionMethodChange}
-                    uploadStatus={uploadStatus}
-                    detectionResults={detectionResults}
-                    resetAnalysis={resetAnalysis}
-                  />
-                </>
-              )}
-
-              {activeTab === "summary" && (
-                <>
-                  {/* Results Summary & Detections Combined */}
-                  <ResultsSummary
-                    isCollapsed={isResultsCollapsed}
-                    setIsCollapsed={setIsResultsCollapsed}
-                    detectionResults={detectionResults}
-                    selectedDetections={selectedDetections}
-                    showBoundingBoxes={showBoundingBoxes}
-                    setShowBoundingBoxes={setShowBoundingBoxes}
-                    confidenceFilter={confidenceFilter}
-                    setConfidenceFilter={setConfidenceFilter}
-                    toggleDetectionSelection={toggleDetectionSelection}
-                    selectAllDetections={selectAllDetections}
-                    deselectAllDetections={deselectAllDetections}
-                    isManualDetectionMode={isManualDetectionMode}
-                    toggleManualDetectionMode={toggleManualDetectionMode}
-                    manualDetections={manualDetections}
-                  />
-                </>
-              )}
             </div>
           </div>
-          {/* Centered Image Display */}
-          <div className="flex-1 flex flex-col items-center justify-center min-h-0 w-full">
-            <div className="flex-1 flex flex-col justify-center items-center min-h-0 w-full max-w-[98vw] md:max-w-[1800px]">
-              <ImagePreview
-                imagePreview={imagePreview}
-                uploadedFile={uploadedFile}
-                detectionResults={detectionResults}
-                uploadLoading={uploadLoading}
-                showBoundingBoxes={showBoundingBoxes}
-                selectedDetections={selectedDetections}
-                imageDisplayDimensions={imageDisplayDimensions}
-                handleImageLoad={handleImageLoad}
-                toggleDetectionSelection={toggleDetectionSelection}
-                getScaledBoundingBox={getScaledBoundingBox}
-                confidenceFilter={confidenceFilter}
-                isManualDetectionMode={isManualDetectionMode}
-                handleImageMouseDown={handleImageMouseDown}
-                handleImageMouseMove={handleImageMouseMove}
-                handleImageMouseUp={handleImageMouseUp}
-                drawingBox={drawingBox}
-                manualDetections={manualDetections}
-              />
+
+          {/* Column 3: Main Image Display Area (Wide) */}
+          <div className="flex-1 flex items-center justify-center bg-secondary/10 overflow-hidden">
+            <div className="w-full h-full flex items-center justify-center p-2">
+              <div className="max-w-full max-h-full flex items-center justify-center">
+                <ImagePreview
+                  imagePreview={imagePreview}
+                  uploadedFile={uploadedFile}
+                  detectionResults={detectionResults}
+                  uploadLoading={uploadLoading}
+                  showBoundingBoxes={showBoundingBoxes}
+                  selectedDetections={selectedDetections}
+                  imageDisplayDimensions={imageDisplayDimensions}
+                  handleImageLoad={handleImageLoad}
+                  toggleDetectionSelection={toggleDetectionSelection}
+                  getScaledBoundingBox={getScaledBoundingBox}
+                  confidenceFilter={confidenceFilter}
+                  isManualDetectionMode={isManualDetectionMode}
+                  handleImageMouseDown={handleImageMouseDown}
+                  handleImageMouseMove={handleImageMouseMove}
+                  handleImageMouseUp={handleImageMouseUp}
+                  drawingBox={drawingBox}
+                  manualDetections={manualDetections}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,4 @@
-import { Eye, EyeOff, MousePointer, PenLine } from "lucide-react"
-import { cn } from "../../lib/utils"
+import { BarChart3, Eye, EyeOff, MousePointer, PenLine } from "lucide-react"
 import { Badge } from "../ui/Badge"
 import { Button } from "../ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
@@ -24,10 +23,10 @@ export function ResultsSummary({
       <Card className="shadow-comfortable border-comfortable">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📊</span>
-              <CardTitle className="text-base md:text-lg">Results & Detections</CardTitle>
-            </div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart3 className="w-5 h-5" />
+              Results
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -52,35 +51,26 @@ export function ResultsSummary({
   const filteredDetections = detectionResults.detections?.filter(
     detection => detection.confidence >= confidenceFilter / 100
   ) || []
-  
+
   const filteredTotal = filteredDetections.length
-  
+
   // Calculate filtered selected detections (only count selections that pass the confidence filter)
   const filteredSelectedDetections = detectionResults.detections?.filter(
     (detection, index) => selectedDetections.has(index) && detection.confidence >= confidenceFilter / 100
   ) || []
-  
+
   const filteredSelectedCount = filteredSelectedDetections.length
 
   return (
     <Card className="shadow-comfortable border-comfortable">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center justify-between flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">📊</span>
-              <CardTitle className="text-base md:text-lg">Results & Detections</CardTitle>
-            </div>
-            <div className="flex items-center gap-2 md:gap-3">
-              <Badge variant="outline" size="sm" className="bg-muted/50 border-border/50 text-xs">
-                {filteredSelectedCount}/{filteredTotal}
-                {manualDetections && manualDetections.length > 0 && (
-                  <span className="ml-1 text-blue-600">+{manualDetections.length}M</span>
-                )}
-              </Badge>
-            </div>
-          </div>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" />
+            Results
+          </CardTitle>
         </div>
+
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Results Summary */}
@@ -88,7 +78,7 @@ export function ResultsSummary({
           <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">
             <div className="text-xl font-bold text-primary">{filteredTotal}</div>
             <div className="text-xs font-medium text-muted-foreground">
-              AI Total
+              Total
             </div>
           </div>
           <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-200">
@@ -102,7 +92,7 @@ export function ResultsSummary({
         </div>
 
         {/* Confidence Filter */}
-        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+        <div className="space-y-4 p-3 bg-muted/30 rounded-lg border">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">Confidence Filter</span>
             <Badge variant="outline" size="sm" className="bg-primary/10 border-primary/20 text-primary">
@@ -190,9 +180,9 @@ export function ResultsSummary({
         </div>
 
         {/* Detection List - Responsive */}
-        <div className="space-y-2">
-          {/* Mobile Dropdown (screens < 768px) */}
-          <div className="block md:hidden">
+        <div className="space-y-4">
+          {/* Always use the mobile dropdown for all screens */}
+          <div className="w-full">
             <select
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer hover:border-primary/50"
               onChange={(e) => {
@@ -204,15 +194,14 @@ export function ResultsSummary({
               value=""
             >
               <option value="" disabled>
-                Select detection ({filteredDetections.length} available)
+                Select detection
               </option>
               {filteredDetections.map((detection, originalIndex) => {
                 const detectionIndex = detectionResults.detections.findIndex(d => d === detection)
                 const isSelected = selectedDetections.has(detectionIndex)
-                
                 return (
-                  <option 
-                    key={detectionIndex} 
+                  <option
+                    key={detectionIndex}
                     value={detectionIndex}
                   >
                     {isSelected ? "✓ " : "○ "}Cow #{detectionIndex + 1} - {(detection.confidence * 100).toFixed(0)}%
@@ -220,8 +209,7 @@ export function ResultsSummary({
                 )
               })}
             </select>
-            
-            {/* Mobile Stats */}
+            {/* Stats */}
             <div className="text-xs text-muted-foreground text-center mt-2">
               {filteredSelectedCount > 0 && (
                 <span>
@@ -229,62 +217,6 @@ export function ResultsSummary({
                 </span>
               )}
             </div>
-          </div>
-
-          {/* Desktop/Tablet List View (screens >= 768px) */}
-          <div className="hidden md:block space-y-2 max-h-[calc(100vh-700px)] overflow-y-auto no-scrollbar">
-            {filteredDetections.map((detection, originalIndex) => {
-              const detectionIndex = detectionResults.detections.findIndex(d => d === detection)
-              const isSelected = selectedDetections.has(detectionIndex)
-              
-              return (
-                <div
-                  key={detectionIndex}
-                  className={cn(
-                    "p-3 rounded-lg border-2 cursor-pointer transition-all duration-200",
-                    isSelected
-                      ? "bg-primary/10 border-primary"
-                      : "bg-muted/30 border-border hover:border-primary/50",
-                  )}
-                  onClick={() => toggleDetectionSelection(detectionIndex)}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={cn(
-                          "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                          isSelected ? "bg-primary border-primary" : "bg-card border-muted",
-                        )}
-                      >
-                        {isSelected && <div className="w-2 h-2 rounded-full bg-card"></div>}
-                      </div>
-                      <span className="font-medium text-foreground">Cow #{detectionIndex + 1}</span>
-                    </div>
-                    <Badge 
-                      variant="outline" 
-                      size="sm" 
-                      className={cn(
-                        "text-xs font-medium px-2 py-0.5",
-                        "bg-primary/5 border-primary/20 text-primary",
-                        "transition-colors duration-200"
-                      )}
-                    >
-                      {(detection.confidence * 100).toFixed(1)}%
-                    </Badge>
-                  </div>
-                  <div className="text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Position:</span>
-                      <span className="text-foreground/90 font-medium">({Math.round(detection.bbox[0])}, {Math.round(detection.bbox[1])})</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Size:</span>
-                      <span className="text-foreground/90 font-medium">{Math.round(detection.bbox[2] - detection.bbox[0])} × {Math.round(detection.bbox[3] - detection.bbox[1])} px</span>
-                    </div>
-                  </div>
-                </div>
-              )
-            })}
           </div>
         </div>
       </CardContent>

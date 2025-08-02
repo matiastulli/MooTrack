@@ -3,7 +3,7 @@
 import { compressImage } from "@/lib/imageUtils"
 import { cn } from "@/lib/utils"
 import { api } from "@/services/api"
-import { BarChart3, Moon, Sun, Tag } from "lucide-react"
+import { BarChart3, Moon, Sun, Upload } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ImagePreview } from "./cow-counter/ImagePreview"
 import { ResultsSummary } from "./cow-counter/ResultsSummary"
@@ -377,7 +377,7 @@ export default function MainApp() {
           {/* Column 1: Navigation Icons (Narrow) */}
           <div className="w-12 bg-card/50 border-r border-border/50 flex flex-col items-center py-3 space-y-3 flex-shrink-0">
             {[
-              { id: "upload_image", icon: Tag, label: "Upload Image" },
+              { id: "upload_image", icon: Upload, label: "Upload Image" },
               { id: "summary", icon: BarChart3, label: "Results Summary" }
             ].map((tab) => {
               const Icon = tab.icon

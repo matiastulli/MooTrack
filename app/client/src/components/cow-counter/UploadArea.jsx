@@ -16,7 +16,7 @@ export function UploadArea({
 }) {
   return (
     <Card className="shadow-comfortable border-comfortable">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-6">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
             <Upload className="w-5 h-5" />

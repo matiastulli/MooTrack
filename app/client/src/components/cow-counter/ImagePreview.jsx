@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { Minus, Plus } from "lucide-react"
 import { useEffect, useState } from "react"
-import { Badge } from "../ui/Badge"
 import { Button } from "../ui/Button"
 import { Card, CardContent } from "../ui/Card"
 
@@ -44,7 +43,7 @@ export function ImagePreview({
       handleImageMouseDown(e)
       return
     }
-    
+
     if (scale > 1) {
       e.preventDefault()
       setIsDragging(true)
@@ -57,7 +56,7 @@ export function ImagePreview({
       handleImageMouseMove(e)
       return
     }
-    
+
     if (isDragging && scale > 1) {
       const newX = e.clientX - dragStart.x
       const newY = e.clientY - dragStart.y
@@ -110,7 +109,7 @@ export function ImagePreview({
   return (
     <Card className="shadow-comfortable h-full w-full flex flex-col">
       <CardContent className="flex-1 flex flex-col p-0 w-full h-full">
-        <div 
+        <div
           className="relative flex-1 flex items-center justify-center w-full h-full bg-muted/10 rounded-xl overflow-hidden"
           onMouseEnter={() => setShowZoomControls(true)}
           onMouseLeave={() => setShowZoomControls(false)}
@@ -118,33 +117,41 @@ export function ImagePreview({
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
-          style={{ 
-            cursor: isManualDetectionMode ? 'crosshair' : scale > 1 ? 'grab' : 'default', 
-            minHeight: '70vh', 
-            minWidth: '70vw' 
+          style={{
+            cursor: isManualDetectionMode ? 'crosshair' : scale > 1 ? 'grab' : 'default',
+            minHeight: '70vh',
+            minWidth: '70vw'
           }}
         >
-          {/* Zoom Controls */}
+          {/* Zoom Controls - Forced Bottom Left Position */}
           <div className={cn(
-            "absolute top-4 right-4 flex items-center gap-2 transition-opacity duration-200 z-50",
-            showZoomControls ? "opacity-100" : "opacity-0"
-          )}>
+            "fixed left-3 bottom-3 flex items-center gap-2 bg-background/95 rounded-lg px-2 py-0 shadow-xl border border-border",
+            "backdrop-blur-sm z-[9999]",
+            showZoomControls ? "opacity-100" : "opacity-70 hover:opacity-100"
+          )}
+            style={{
+              position: 'absolute',
+              left: '16px',
+              bottom: '16px',
+              zIndex: 9999
+            }}
+          >
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="w-8 h-8 shadow-lg"
+              className="w-7 h-7 dark:text-white"
               onClick={() => adjustZoom(-0.5)}
               disabled={scale === 1}
             >
               <Minus className="h-4 w-4" />
             </Button>
-            <Badge variant="secondary" className="shadow-lg">
+            <span className="text-xs font-semibold min-w-[36px] text-center select-none zoom-percentage-label dark:text-white">
               {Math.round(scale * 100)}%
-            </Badge>
+            </span>
             <Button
-              variant="secondary"
+              variant="ghost"
               size="icon"
-              className="w-8 h-8 shadow-lg"
+              className="w-7 h-7 dark:text-white"
               onClick={() => adjustZoom(0.5)}
               disabled={scale === 4}
             >
@@ -171,7 +178,7 @@ export function ImagePreview({
 
           {/* Enhanced Bounding Boxes */}
           {detectionResults?.detections && showBoundingBoxes && (
-            <div 
+            <div
               className="absolute pointer-events-none"
               style={{
                 // Position relative to the displayed image, not the container
@@ -187,7 +194,7 @@ export function ImagePreview({
                 .map((detection, originalIndex) => ({ detection, originalIndex }))
                 .filter(({ detection }) => detection.confidence >= confidenceFilter / 100)
                 .map(({ detection, originalIndex }) => {
-                  
+
                   // Handle different bbox formats
                   let bbox;
                   if (detection.bbox && Array.isArray(detection.bbox)) {
@@ -196,8 +203,8 @@ export function ImagePreview({
                     if (originalIndex === 0) {
                       console.log(`Detection ${originalIndex}: Using standard bbox format:`, bbox);
                     }
-                  } else if (detection.x !== undefined && detection.y !== undefined && 
-                           detection.width !== undefined && detection.height !== undefined) {
+                  } else if (detection.x !== undefined && detection.y !== undefined &&
+                    detection.width !== undefined && detection.height !== undefined) {
                     // Roboflow format: {x, y, width, height} where x,y are center coordinates
                     bbox = [
                       detection.x - detection.width / 2,   // x1 (left)
@@ -216,16 +223,16 @@ export function ImagePreview({
                     console.warn('Unrecognized detection format:', detection);
                     return null;
                   }
-                  
+
                   const [x1, y1, x2, y2] = getScaledBoundingBox(bbox)
                   const isSelected = selectedDetections.has(originalIndex)
-                  
+
                   // Log only for first detection to avoid spam
                   if (originalIndex === 0) {
-                    console.log(`Detection ${originalIndex}: Scaled bbox:`, { 
-                      x1, y1, x2, y2, 
-                      width: x2-x1, 
-                      height: y2-y1,
+                    console.log(`Detection ${originalIndex}: Scaled bbox:`, {
+                      x1, y1, x2, y2,
+                      width: x2 - x1,
+                      height: y2 - y1,
                       imageDisplayDimensions,
                       percentX1: (x1 / imageDisplayDimensions.width * 100).toFixed(2),
                       percentY1: (y1 / imageDisplayDimensions.height * 100).toFixed(2)
@@ -239,30 +246,30 @@ export function ImagePreview({
                         "absolute border-2 cursor-pointer transition-all duration-200 pointer-events-auto group",
                         isSelected
                           ? "border-violet-500"
-                        : "border-violet-400 hover:border-violet-600",
-                    )}
-                    style={{
-                      left: `${x1}px`,
-                      top: `${y1}px`,
-                      width: `${x2 - x1}px`,
-                      height: `${y2 - y1}px`,
-                    }}
-                    onClick={() => toggleDetectionSelection(originalIndex)}
-                    title={`Cow #${originalIndex + 1} - ${(detection.confidence * 100).toFixed(1)}% confidence`}
-                  >
-                    {/* Cow Number - Show on Hover */}
-                    <div
-                      className={cn(
-                        "absolute -top-6 left-0 px-1.5 py-0.5 rounded text-xs font-medium transition-all duration-200",
-                        "opacity-0 group-hover:opacity-100",
-                        isSelected 
-                          ? "bg-violet-600 text-white" 
-                          : "bg-violet-500 text-white",
+                          : "border-violet-400 hover:border-violet-600",
                       )}
+                      style={{
+                        left: `${x1}px`,
+                        top: `${y1}px`,
+                        width: `${x2 - x1}px`,
+                        height: `${y2 - y1}px`,
+                      }}
+                      onClick={() => toggleDetectionSelection(originalIndex)}
+                      title={`Cow #${originalIndex + 1} - ${(detection.confidence * 100).toFixed(1)}% confidence`}
                     >
-                      Cow {originalIndex + 1}
+                      {/* Cow Number - Show on Hover */}
+                      <div
+                        className={cn(
+                          "absolute -top-6 left-0 px-1.5 py-0.5 rounded text-xs font-medium transition-all duration-200",
+                          "opacity-0 group-hover:opacity-100",
+                          isSelected
+                            ? "bg-violet-600 text-white"
+                            : "bg-violet-500 text-white",
+                        )}
+                      >
+                        Cow {originalIndex + 1}
+                      </div>
                     </div>
-                  </div>
                   )
                 }).filter(Boolean)}
             </div>
@@ -270,7 +277,7 @@ export function ImagePreview({
 
           {/* Manual Detection Boxes */}
           {manualDetections && manualDetections.length > 0 && showBoundingBoxes && (
-            <div 
+            <div
               className="absolute pointer-events-none"
               style={{
                 left: '50%',
@@ -283,7 +290,7 @@ export function ImagePreview({
             >
               {manualDetections.map((detection, index) => {
                 const [x1, y1, x2, y2] = getScaledBoundingBox(detection.bbox)
-                
+
                 return (
                   <div
                     key={`manual-${index}`}
@@ -307,7 +314,7 @@ export function ImagePreview({
 
           {/* Drawing Box Preview */}
           {drawingBox && isManualDetectionMode && (
-            <div 
+            <div
               className="absolute pointer-events-none"
               style={{
                 left: '50%',

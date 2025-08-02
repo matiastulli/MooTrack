@@ -70,55 +70,60 @@ export function ResultsSummary({
             Results
           </CardTitle>
         </div>
-
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Results Summary */}
+      <CardContent className="space-y-6">
+        {/* Summary Row */}
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
+          <span>
+            <span className="font-semibold text-foreground">{filteredSelectedCount}</span> selected
+            <span className="mx-1 text-muted-foreground">+</span>
+            <span className="font-semibold text-blue-600 dark:text-blue-400">{manualDetections?.length || 0} Manual</span>
+          </span>
+        </div>
+
+        {/* Results Grid */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">
-            <div className="text-xl font-bold text-primary">{filteredTotal}</div>
-            <div className="text-xs font-medium text-muted-foreground">
-              Total
-            </div>
-          </div>
-          <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-            <div className="text-xl font-bold text-emerald-600">{filteredSelectedCount}</div>
-            <div className="text-xs font-medium text-muted-foreground">Selected</div>
-          </div>
-          <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
-            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{manualDetections?.length || 0}</div>
-            <div className="text-xs font-medium text-muted-foreground">Manual</div>
-          </div>
+          <SummaryStat
+            label="Total"
+            value={filteredTotal}
+            className="bg-primary/10 border-primary/20 text-primary"
+          />
+          <SummaryStat
+            label="Selected"
+            value={filteredSelectedCount}
+            className="bg-emerald-50 border-emerald-200 text-emerald-600"
+          />
+          <SummaryStat
+            label="Manual"
+            value={manualDetections?.length || 0}
+            className="bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400"
+          />
         </div>
 
         {/* Confidence Filter */}
-        <div className="space-y-4 p-3 bg-muted/30 rounded-lg border">
+        <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-foreground">Confidence Filter</span>
             <Badge variant="outline" size="sm" className="bg-primary/10 border-primary/20 text-primary">
               {confidenceFilter}%
             </Badge>
           </div>
-          <div className="space-y-2">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="1"
-              value={confidenceFilter}
-              onChange={(e) => setConfidenceFilter(Number(e.target.value))}
-              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer slider"
-              style={{
-                background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${confidenceFilter}%, hsl(var(--muted)) ${confidenceFilter}%, hsl(var(--muted)) 100%)`
-              }}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0%</span>
-              <span className="text-foreground font-medium">
-                {filteredDetections.length} / {detectionResults.detections.length} detections
-              </span>
-              <span>100%</span>
-            </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={confidenceFilter}
+            onChange={e => setConfidenceFilter(Number(e.target.value))}
+            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer slider"
+            style={{
+              background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${confidenceFilter}%, hsl(var(--muted)) ${confidenceFilter}%, hsl(var(--muted)) 100%)`
+            }}
+          />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>0%</span>
+            <span className="text-foreground font-medium">{filteredDetections.length} shown</span>
+            <span>100%</span>
           </div>
         </div>
 
@@ -136,7 +141,7 @@ export function ResultsSummary({
           <Button
             variant="outline"
             size="sm"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               toggleManualDetectionMode()
             }}
@@ -152,7 +157,7 @@ export function ResultsSummary({
           <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="font-medium text-sm text-blue-800 dark:text-blue-200">Manual Detection Mode</p>
             <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
-              Click and drag on the image to draw bounding boxes around cows the AI may have missed
+              Click and drag on the image to draw bounding boxes around cows the AI may have missed.
             </p>
           </div>
         )}
@@ -179,47 +184,48 @@ export function ResultsSummary({
           </Button>
         </div>
 
-        {/* Detection List - Responsive */}
-        <div className="space-y-4">
-          {/* Always use the mobile dropdown for all screens */}
-          <div className="w-full">
-            <select
-              className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer hover:border-primary/50"
-              onChange={(e) => {
-                const selectedIndex = Number(e.target.value)
-                if (!isNaN(selectedIndex) && selectedIndex >= 0) {
-                  toggleDetectionSelection(selectedIndex)
-                }
-              }}
-              value=""
-            >
-              <option value="" disabled>
-                Select detection
-              </option>
-              {filteredDetections.map((detection, originalIndex) => {
-                const detectionIndex = detectionResults.detections.findIndex(d => d === detection)
-                const isSelected = selectedDetections.has(detectionIndex)
-                return (
-                  <option
-                    key={detectionIndex}
-                    value={detectionIndex}
-                  >
-                    {isSelected ? "✓ " : "○ "}Cow #{detectionIndex + 1} - {(detection.confidence * 100).toFixed(0)}%
-                  </option>
-                )
-              })}
-            </select>
-            {/* Stats */}
+        {/* Detection List */}
+        <div>
+          <select
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 cursor-pointer hover:border-primary/50"
+            onChange={e => {
+              const selectedIndex = Number(e.target.value)
+              if (!isNaN(selectedIndex) && selectedIndex >= 0) {
+                toggleDetectionSelection(selectedIndex)
+              }
+            }}
+            value=""
+          >
+            <option value="" disabled>
+              Select detection
+            </option>
+            {filteredDetections.map((detection, originalIndex) => {
+              const detectionIndex = detectionResults.detections.findIndex(d => d === detection)
+              const isSelected = selectedDetections.has(detectionIndex)
+              return (
+                <option key={detectionIndex} value={detectionIndex}>
+                  {isSelected ? "✓ " : "○ "}Cow #{detectionIndex + 1} - {(detection.confidence * 100).toFixed(0)}%
+                </option>
+              )
+            })}
+          </select>
+          {filteredSelectedCount > 0 && (
             <div className="text-xs text-muted-foreground text-center mt-2">
-              {filteredSelectedCount > 0 && (
-                <span>
-                  {filteredSelectedCount} selected
-                </span>
-              )}
+              {filteredSelectedCount} selected
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>
   )
+
+// Helper for summary stats
+function SummaryStat({ label, value, className }) {
+  return (
+    <div className={`text-center p-3 rounded-lg border ${className}`}>
+      <div className="text-xl font-bold">{value}</div>
+      <div className="text-xs font-medium text-muted-foreground">{label}</div>
+    </div>
+  )
+}
 }

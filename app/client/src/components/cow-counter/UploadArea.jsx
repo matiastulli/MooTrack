@@ -5,8 +5,6 @@ import { Button } from "../ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
 
 export function UploadArea({
-  isCollapsed,
-  setIsCollapsed,
   uploadLoading,
   imagePreview,
   handleFileChange,
@@ -93,7 +91,7 @@ export function UploadArea({
                 <span className="text-lg">✨</span>
                 <span className="font-bold">Enhanced</span>
               </div>
-              <p className="text-xs text-muted-foreground">High accuracy detection</p>
+              <p className="text-xs">High accuracy detection</p>
             </button>
           </div>
         </div>

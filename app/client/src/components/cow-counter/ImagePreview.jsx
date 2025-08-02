@@ -117,6 +117,7 @@ export function ImagePreview({
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
           style={{ 
             cursor: isManualDetectionMode ? 'crosshair' : scale > 1 ? 'grab' : 'default', 
             minHeight: '70vh', 

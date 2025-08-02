@@ -5,8 +5,6 @@ import { Button } from "../ui/Button"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card"
 
 export function ResultsSummary({
-  isCollapsed,
-  setIsCollapsed,
   detectionResults,
   selectedDetections,
   showBoundingBoxes,
@@ -20,7 +18,35 @@ export function ResultsSummary({
   toggleManualDetectionMode,
   manualDetections,
 }) {
-  if (!detectionResults) return null
+  // Show advice message when no detection results are available
+  if (!detectionResults) {
+    return (
+      <Card className="shadow-comfortable border-comfortable">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">📊</span>
+              <CardTitle className="text-base md:text-lg">Results & Detections</CardTitle>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center py-8 px-4">
+            <div className="text-4xl mb-4 opacity-50">📷</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No Image Uploaded</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Please upload an image first to see detection results and analysis.
+            </p>
+            <div className="bg-muted/30 rounded-lg p-4 border">
+              <p className="text-xs text-muted-foreground">
+                💡 <strong>Tip:</strong> Switch to the "Upload Image" tab to select and analyze an image for cow detection.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   // Calculate filtered results based on confidence threshold
   const filteredDetections = detectionResults.detections?.filter(

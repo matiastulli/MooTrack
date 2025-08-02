@@ -37,9 +37,6 @@ export default function MainApp() {
   const [imageDisplayDimensions, setImageDisplayDimensions] = useState({ width: 0, height: 0 })
   const [showBoundingBoxes, setShowBoundingBoxes] = useState(true)
   const [confidenceFilter, setConfidenceFilter] = useState(20) // Default to 20%
-  const [isUploadCollapsed, setIsUploadCollapsed] = useState(false)
-  const [isResultsCollapsed, setIsResultsCollapsed] = useState(false)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [isManualDetectionMode, setIsManualDetectionMode] = useState(false)
   const [manualDetections, setManualDetections] = useState([])
   const [drawingBox, setDrawingBox] = useState(null)
@@ -115,7 +112,6 @@ export default function MainApp() {
         setDetectionResults(response)
         const imageUrl = URL.createObjectURL(file)
         setImagePreview(imageUrl)
-        setIsUploadCollapsed(true)
         if (response.detections) {
           setSelectedDetections(new Set(response.detections.map((_, index) => index)))
         }
@@ -219,7 +215,6 @@ export default function MainApp() {
     setSelectedDetections(new Set())
     setManualDetections([])
     setIsManualDetectionMode(false)
-    setIsUploadCollapsed(false)
     // Reset file input
     const fileInput = document.getElementById("file-upload")
     if (fileInput) fileInput.value = ""
@@ -290,11 +285,18 @@ export default function MainApp() {
   }
   
   const handleImageMouseUp = () => {
-    if (!drawingBox || !isManualDetectionMode) return
+    console.log('handleImageMouseUp called, drawingBox:', drawingBox, 'isManualDetectionMode:', isManualDetectionMode)
+    
+    if (!drawingBox || !isManualDetectionMode) {
+      setDrawingBox(null) // Clear any incomplete drawing
+      return
+    }
     
     // Only save boxes with some minimum size
     const width = Math.abs(drawingBox.endX - drawingBox.startX)
     const height = Math.abs(drawingBox.endY - drawingBox.startY)
+    
+    console.log('Box dimensions:', { width, height })
     
     if (width > 20 && height > 20) {
       // Convert to [x1, y1, x2, y2] format
@@ -314,6 +316,8 @@ export default function MainApp() {
         y2 * scaleY
       ]
       
+      console.log('Adding manual detection:', naturalBox)
+      
       // Add the new manual detection
       setManualDetections([...manualDetections, {
         bbox: naturalBox,
@@ -321,6 +325,8 @@ export default function MainApp() {
         class: "cow",
         manual: true
       }])
+    } else {
+      console.log('Box too small, not saving')
     }
     
     setDrawingBox(null)
@@ -397,69 +403,39 @@ export default function MainApp() {
           </div>
 
           {/* Column 2: Options Panel (Medium) */}
-          <div className="relative flex flex-shrink-0">
-            {/* Always Visible Collapse Toggle Button */}
-            <div className="absolute -right-3 top-2 z-10">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="w-6 h-6 p-0 bg-background shadow-md border"
-              >
-                <div className={cn(
-                  "transition-transform duration-300 text-xs",
-                  isSidebarCollapsed ? "rotate-180" : ""
-                )}>
-                  ◀
-                </div>
-              </Button>
-            </div>
-            
-            {/* Collapsible Content */}
-            <div className={cn(
-              "bg-background border-r border-border/50 transition-all duration-300 overflow-hidden",
-              isSidebarCollapsed ? "w-0" : "w-72"
-            )}>
-              <div className={cn(
-                "h-full transition-all duration-300 flex flex-col",
-                isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
-              )}>
-                {/* Tab Content */}
-                <div className="px-3 pt-8 pb-3 flex-1 overflow-y-auto">
-                  {activeTab === "upload_image" && (
-                    <UploadArea
-                      isCollapsed={isUploadCollapsed}
-                      setIsCollapsed={setIsUploadCollapsed}
-                      uploadLoading={uploadLoading}
-                      imagePreview={imagePreview}
-                      handleFileChange={handleFileChange}
-                      selectedDetectionMethod={selectedDetectionMethod}
-                      handleDetectionMethodChange={handleDetectionMethodChange}
-                      uploadStatus={uploadStatus}
-                      detectionResults={detectionResults}
-                      resetAnalysis={resetAnalysis}
-                    />
-                  )}
+          <div className="w-72 bg-background border-r border-border/50 flex-shrink-0">
+            <div className="h-full flex flex-col">
+              {/* Tab Content */}
+              <div className="px-3 py-3 flex-1 overflow-y-auto">
+                {activeTab === "upload_image" && (
+                  <UploadArea
+                    uploadLoading={uploadLoading}
+                    imagePreview={imagePreview}
+                    handleFileChange={handleFileChange}
+                    selectedDetectionMethod={selectedDetectionMethod}
+                    handleDetectionMethodChange={handleDetectionMethodChange}
+                    uploadStatus={uploadStatus}
+                    detectionResults={detectionResults}
+                    resetAnalysis={resetAnalysis}
+                  />
+                )}
 
-                  {activeTab === "summary" && (
-                    <ResultsSummary
-                      isCollapsed={isResultsCollapsed}
-                      setIsCollapsed={setIsResultsCollapsed}
-                      detectionResults={detectionResults}
-                      selectedDetections={selectedDetections}
-                      showBoundingBoxes={showBoundingBoxes}
-                      setShowBoundingBoxes={setShowBoundingBoxes}
-                      confidenceFilter={confidenceFilter}
-                      setConfidenceFilter={setConfidenceFilter}
-                      toggleDetectionSelection={toggleDetectionSelection}
-                      selectAllDetections={selectAllDetections}
-                      deselectAllDetections={deselectAllDetections}
-                      isManualDetectionMode={isManualDetectionMode}
-                      toggleManualDetectionMode={toggleManualDetectionMode}
-                      manualDetections={manualDetections}
-                    />
-                  )}
-                </div>
+                {activeTab === "summary" && (
+                  <ResultsSummary
+                    detectionResults={detectionResults}
+                    selectedDetections={selectedDetections}
+                    showBoundingBoxes={showBoundingBoxes}
+                    setShowBoundingBoxes={setShowBoundingBoxes}
+                    confidenceFilter={confidenceFilter}
+                    setConfidenceFilter={setConfidenceFilter}
+                    toggleDetectionSelection={toggleDetectionSelection}
+                    selectAllDetections={selectAllDetections}
+                    deselectAllDetections={deselectAllDetections}
+                    isManualDetectionMode={isManualDetectionMode}
+                    toggleManualDetectionMode={toggleManualDetectionMode}
+                    manualDetections={manualDetections}
+                  />
+                )}
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, MousePointer, PenLine } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { Badge } from "../ui/Badge"
 import { Button } from "../ui/Button"
@@ -16,6 +16,9 @@ export function ResultsSummary({
   toggleDetectionSelection,
   selectAllDetections,
   deselectAllDetections,
+  isManualDetectionMode,
+  toggleManualDetectionMode,
+  manualDetections,
 }) {
   if (!detectionResults) return null
 
@@ -48,6 +51,9 @@ export function ResultsSummary({
             <div className="flex items-center gap-2 md:gap-3">
               <Badge variant="outline" size="sm" className="bg-muted/50 border-border/50 text-xs">
                 {filteredSelectedCount}/{filteredTotal}
+                {manualDetections && manualDetections.length > 0 && (
+                  <span className="ml-1 text-blue-600">+{manualDetections.length}M</span>
+                )}
               </Badge>
               <Button
                 variant="ghost"
@@ -65,11 +71,11 @@ export function ResultsSummary({
         isCollapsed && "hidden"
       )}>
         {/* Results Summary */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="text-center p-3 bg-primary/10 rounded-lg border border-primary/20">
             <div className="text-xl font-bold text-primary">{filteredTotal}</div>
             <div className="text-xs font-medium text-muted-foreground">
-              Total
+              AI Total
               {filteredTotal !== detectionResults.total_cows && (
                 <div className="text-xs text-muted-foreground/70 mt-1">
                   ({detectionResults.total_cows} original)
@@ -80,6 +86,10 @@ export function ResultsSummary({
           <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-200">
             <div className="text-xl font-bold text-emerald-600">{filteredSelectedCount}</div>
             <div className="text-xs font-medium text-muted-foreground">Selected</div>
+          </div>
+          <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{manualDetections?.length || 0}</div>
+            <div className="text-xs font-medium text-muted-foreground">Manual</div>
           </div>
         </div>
 
@@ -125,7 +135,29 @@ export function ResultsSummary({
             {showBoundingBoxes ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
             {showBoundingBoxes ? "Hide" : "Show"} Boxes
           </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation()
+              toggleManualDetectionMode()
+            }}
+            className="flex-1 text-xs text-foreground/90 hover:text-foreground"
+          >
+            {isManualDetectionMode ? <MousePointer className="w-3 h-3 mr-1" /> : <PenLine className="w-3 h-3 mr-1" />}
+            {isManualDetectionMode ? "Cancel" : "Manual"}
+          </Button>
         </div>
+
+        {/* Manual Detection Instructions */}
+        {isManualDetectionMode && (
+          <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+            <p className="font-medium text-sm text-blue-800 dark:text-blue-200">Manual Detection Mode</p>
+            <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+              Click and drag on the image to draw bounding boxes around cows the AI may have missed
+            </p>
+          </div>
+        )}
 
         {/* Selection Controls */}
         <div className="flex gap-1 justify-end">

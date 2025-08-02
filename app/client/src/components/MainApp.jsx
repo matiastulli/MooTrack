@@ -40,6 +40,9 @@ export default function MainApp() {
   const [isUploadCollapsed, setIsUploadCollapsed] = useState(false)
   const [isResultsCollapsed, setIsResultsCollapsed] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [isManualDetectionMode, setIsManualDetectionMode] = useState(false)
+  const [manualDetections, setManualDetections] = useState([])
+  const [drawingBox, setDrawingBox] = useState(null)
 
   useEffect(() => {
     return () => {
@@ -215,6 +218,8 @@ export default function MainApp() {
     setDetectionResults(null)
     setUploadStatus(null)
     setSelectedDetections(new Set())
+    setManualDetections([])
+    setIsManualDetectionMode(false)
     setIsUploadCollapsed(false)
     // Reset file input
     const fileInput = document.getElementById("file-upload")
@@ -253,6 +258,77 @@ export default function MainApp() {
     const scaleY = imageDisplayDimensions.height / imageNaturalDimensions.height
 
     return [bbox[0] * scaleX, bbox[1] * scaleY, bbox[2] * scaleX, bbox[3] * scaleY]
+  }
+
+  // Manual detection functions
+  const handleImageMouseDown = (e) => {
+    if (!isManualDetectionMode || !imagePreview) return
+    
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    setDrawingBox({
+      startX: x,
+      startY: y,
+      endX: x,
+      endY: y
+    })
+  }
+  
+  const handleImageMouseMove = (e) => {
+    if (!drawingBox || !isManualDetectionMode) return
+    
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    setDrawingBox({
+      ...drawingBox,
+      endX: x,
+      endY: y
+    })
+  }
+  
+  const handleImageMouseUp = () => {
+    if (!drawingBox || !isManualDetectionMode) return
+    
+    // Only save boxes with some minimum size
+    const width = Math.abs(drawingBox.endX - drawingBox.startX)
+    const height = Math.abs(drawingBox.endY - drawingBox.startY)
+    
+    if (width > 20 && height > 20) {
+      // Convert to [x1, y1, x2, y2] format
+      const x1 = Math.min(drawingBox.startX, drawingBox.endX)
+      const y1 = Math.min(drawingBox.startY, drawingBox.endY)
+      const x2 = Math.max(drawingBox.startX, drawingBox.endX)
+      const y2 = Math.max(drawingBox.startY, drawingBox.endY)
+      
+      // Convert display coordinates to natural image coordinates
+      const scaleX = imageNaturalDimensions.width / imageDisplayDimensions.width
+      const scaleY = imageNaturalDimensions.height / imageDisplayDimensions.height
+      
+      const naturalBox = [
+        x1 * scaleX,
+        y1 * scaleY,
+        x2 * scaleX,
+        y2 * scaleY
+      ]
+      
+      // Add the new manual detection
+      setManualDetections([...manualDetections, {
+        bbox: naturalBox,
+        confidence: 1.0,
+        class: "cow",
+        manual: true
+      }])
+    }
+    
+    setDrawingBox(null)
+  }
+
+  const toggleManualDetectionMode = () => {
+    setIsManualDetectionMode(!isManualDetectionMode)
   }
 
   return (
@@ -349,6 +425,9 @@ export default function MainApp() {
                 toggleDetectionSelection={toggleDetectionSelection}
                 selectAllDetections={selectAllDetections}
                 deselectAllDetections={deselectAllDetections}
+                isManualDetectionMode={isManualDetectionMode}
+                toggleManualDetectionMode={toggleManualDetectionMode}
+                manualDetections={manualDetections}
               />
             </div>
           </div>
@@ -367,6 +446,12 @@ export default function MainApp() {
                 toggleDetectionSelection={toggleDetectionSelection}
                 getScaledBoundingBox={getScaledBoundingBox}
                 confidenceFilter={confidenceFilter}
+                isManualDetectionMode={isManualDetectionMode}
+                handleImageMouseDown={handleImageMouseDown}
+                handleImageMouseMove={handleImageMouseMove}
+                handleImageMouseUp={handleImageMouseUp}
+                drawingBox={drawingBox}
+                manualDetections={manualDetections}
               />
             </div>
           </div>

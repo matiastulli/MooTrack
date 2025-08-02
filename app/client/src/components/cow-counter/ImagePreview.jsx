@@ -17,6 +17,12 @@ export function ImagePreview({
   toggleDetectionSelection,
   getScaledBoundingBox,
   confidenceFilter,
+  isManualDetectionMode,
+  handleImageMouseDown,
+  handleImageMouseMove,
+  handleImageMouseUp,
+  drawingBox,
+  manualDetections,
 }) {
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
@@ -34,6 +40,11 @@ export function ImagePreview({
   }
 
   const handleMouseDown = (e) => {
+    if (isManualDetectionMode) {
+      handleImageMouseDown(e)
+      return
+    }
+    
     if (scale > 1) {
       e.preventDefault()
       setIsDragging(true)
@@ -42,6 +53,11 @@ export function ImagePreview({
   }
 
   const handleMouseMove = (e) => {
+    if (isManualDetectionMode) {
+      handleImageMouseMove(e)
+      return
+    }
+    
     if (isDragging && scale > 1) {
       const newX = e.clientX - dragStart.x
       const newY = e.clientY - dragStart.y
@@ -50,6 +66,10 @@ export function ImagePreview({
   }
 
   const handleMouseUp = () => {
+    if (isManualDetectionMode) {
+      handleImageMouseUp()
+      return
+    }
     setIsDragging(false)
   }
 
@@ -97,7 +117,11 @@ export function ImagePreview({
           onWheel={handleWheel}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
-          style={{ cursor: scale > 1 ? 'grab' : 'default', minHeight: '70vh', minWidth: '70vw' }}
+          style={{ 
+            cursor: isManualDetectionMode ? 'crosshair' : scale > 1 ? 'grab' : 'default', 
+            minHeight: '70vh', 
+            minWidth: '70vw' 
+          }}
         >
           {/* Zoom Controls */}
           <div className={cn(
@@ -248,6 +272,68 @@ export function ImagePreview({
                   </div>
                   )
                 }).filter(Boolean)}
+            </div>
+          )}
+
+          {/* Manual Detection Boxes */}
+          {manualDetections && manualDetections.length > 0 && showBoundingBoxes && (
+            <div 
+              className="absolute pointer-events-none"
+              style={{
+                left: '50%',
+                top: '50%',
+                width: `${imageDisplayDimensions.width}px`,
+                height: `${imageDisplayDimensions.height}px`,
+                transform: `translate(-50%, -50%) scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                transformOrigin: 'center'
+              }}
+            >
+              {manualDetections.map((detection, index) => {
+                const [x1, y1, x2, y2] = getScaledBoundingBox(detection.bbox)
+                
+                return (
+                  <div
+                    key={`manual-${index}`}
+                    className="absolute border-2 border-blue-500 bg-blue-500/20 transition-all duration-200 group"
+                    style={{
+                      left: `${x1}px`,
+                      top: `${y1}px`,
+                      width: `${x2 - x1}px`,
+                      height: `${y2 - y1}px`,
+                    }}
+                    title={`Manual Detection #${index + 1}`}
+                  >
+                    <div className="absolute -top-6 left-0 px-1.5 py-0.5 rounded text-xs font-medium bg-blue-600 text-white opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      Manual {index + 1}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Drawing Box Preview */}
+          {drawingBox && isManualDetectionMode && (
+            <div 
+              className="absolute pointer-events-none"
+              style={{
+                left: '50%',
+                top: '50%',
+                width: `${imageDisplayDimensions.width}px`,
+                height: `${imageDisplayDimensions.height}px`,
+                transform: `translate(-50%, -50%) scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                transformOrigin: 'center'
+              }}
+            >
+              <div
+                className="absolute border-2 border-blue-500 bg-blue-500/20 border-dashed"
+                style={{
+                  left: `${Math.min(drawingBox.startX, drawingBox.endX)}px`,
+                  top: `${Math.min(drawingBox.startY, drawingBox.endY)}px`,
+                  width: `${Math.abs(drawingBox.endX - drawingBox.startX)}px`,
+                  height: `${Math.abs(drawingBox.endY - drawingBox.startY)}px`,
+                }}
+              />
             </div>
           )}
 

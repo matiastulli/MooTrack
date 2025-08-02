@@ -3,7 +3,7 @@
 import { compressImage } from "@/lib/imageUtils"
 import { cn } from "@/lib/utils"
 import { api } from "@/services/api"
-import { Moon, Sun } from "lucide-react"
+import { BarChart3, Moon, Sun, Tag } from "lucide-react"
 import { useEffect, useState } from "react"
 import { ImagePreview } from "./cow-counter/ImagePreview"
 import { ResultsSummary } from "./cow-counter/ResultsSummary"
@@ -43,6 +43,7 @@ export default function MainApp() {
   const [isManualDetectionMode, setIsManualDetectionMode] = useState(false)
   const [manualDetections, setManualDetections] = useState([])
   const [drawingBox, setDrawingBox] = useState(null)
+  const [activeTab, setActiveTab] = useState("upload_image")
 
   useEffect(() => {
     return () => {
@@ -106,8 +107,6 @@ export default function MainApp() {
           message: `Detection failed: ${response.error}`,
         })
       } else {
-        console.log('Detection API Response:', response)
-        console.log('First detection format:', response.detections?.[0])
         
         setUploadStatus({
           type: "success",
@@ -399,36 +398,77 @@ export default function MainApp() {
               "p-4", // Add padding for better mobile spacing
               isSidebarCollapsed ? "opacity-0 invisible" : "opacity-100 visible"
             )}>
-              {/* Upload Section */}
-              <UploadArea
-                isCollapsed={isUploadCollapsed}
-                setIsCollapsed={setIsUploadCollapsed}
-                uploadLoading={uploadLoading}
-                imagePreview={imagePreview}
-                handleFileChange={handleFileChange}
-                selectedDetectionMethod={selectedDetectionMethod}
-                handleDetectionMethodChange={handleDetectionMethodChange}
-                uploadStatus={uploadStatus}
-                detectionResults={detectionResults}
-                resetAnalysis={resetAnalysis}
-              />
-              {/* Results Summary & Detections Combined */}
-              <ResultsSummary
-                isCollapsed={isResultsCollapsed}
-                setIsCollapsed={setIsResultsCollapsed}
-                detectionResults={detectionResults}
-                selectedDetections={selectedDetections}
-                showBoundingBoxes={showBoundingBoxes}
-                setShowBoundingBoxes={setShowBoundingBoxes}
-                confidenceFilter={confidenceFilter}
-                setConfidenceFilter={setConfidenceFilter}
-                toggleDetectionSelection={toggleDetectionSelection}
-                selectAllDetections={selectAllDetections}
-                deselectAllDetections={deselectAllDetections}
-                isManualDetectionMode={isManualDetectionMode}
-                toggleManualDetectionMode={toggleManualDetectionMode}
-                manualDetections={manualDetections}
-              />
+              {/* Navigation Tabs */}
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-muted-foreground px-2">Navigation</h3>
+                <div className="grid grid-cols-1 gap-1">
+                  {[
+                    { id: "upload_image", icon: Tag, label: "Upload Image", color: "emerald" },
+                    { id: "summary", icon: BarChart3, label: "Results Summary", color: "blue" }
+                  ].map((tab) => {
+                    const Icon = tab.icon
+                    const isActive = activeTab === tab.id
+                    return (
+                      <Button
+                        key={tab.id}
+                        variant={isActive ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                          "justify-start gap-3 h-10 px-3 text-sm font-medium transition-all duration-200",
+                          isActive 
+                            ? "bg-primary text-primary-foreground shadow-sm" 
+                            : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{tab.label}</span>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === "upload_image" && (
+                <>
+                  {/* Upload Section */}
+                  <UploadArea
+                    isCollapsed={isUploadCollapsed}
+                    setIsCollapsed={setIsUploadCollapsed}
+                    uploadLoading={uploadLoading}
+                    imagePreview={imagePreview}
+                    handleFileChange={handleFileChange}
+                    selectedDetectionMethod={selectedDetectionMethod}
+                    handleDetectionMethodChange={handleDetectionMethodChange}
+                    uploadStatus={uploadStatus}
+                    detectionResults={detectionResults}
+                    resetAnalysis={resetAnalysis}
+                  />
+                </>
+              )}
+
+              {activeTab === "summary" && (
+                <>
+                  {/* Results Summary & Detections Combined */}
+                  <ResultsSummary
+                    isCollapsed={isResultsCollapsed}
+                    setIsCollapsed={setIsResultsCollapsed}
+                    detectionResults={detectionResults}
+                    selectedDetections={selectedDetections}
+                    showBoundingBoxes={showBoundingBoxes}
+                    setShowBoundingBoxes={setShowBoundingBoxes}
+                    confidenceFilter={confidenceFilter}
+                    setConfidenceFilter={setConfidenceFilter}
+                    toggleDetectionSelection={toggleDetectionSelection}
+                    selectAllDetections={selectAllDetections}
+                    deselectAllDetections={deselectAllDetections}
+                    isManualDetectionMode={isManualDetectionMode}
+                    toggleManualDetectionMode={toggleManualDetectionMode}
+                    manualDetections={manualDetections}
+                  />
+                </>
+              )}
             </div>
           </div>
           {/* Centered Image Display */}

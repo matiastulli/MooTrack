@@ -186,14 +186,6 @@ export function ImagePreview({
                 .map((detection, originalIndex) => ({ detection, originalIndex }))
                 .filter(({ detection }) => detection.confidence >= confidenceFilter / 100)
                 .map(({ detection, originalIndex }) => {
-                  // Debug logging
-                  if (originalIndex === 0) {
-                    console.log('Detection format debug:', {
-                      detection,
-                      imageDisplayDimensions,
-                      imageNaturalDimensions: window.imageNaturalDimensions
-                    });
-                  }
                   
                   // Handle different bbox formats
                   let bbox;

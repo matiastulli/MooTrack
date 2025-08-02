@@ -76,11 +76,6 @@ export function ResultsSummary({
             <div className="text-xl font-bold text-primary">{filteredTotal}</div>
             <div className="text-xs font-medium text-muted-foreground">
               AI Total
-              {filteredTotal !== detectionResults.total_cows && (
-                <div className="text-xs text-muted-foreground/70 mt-1">
-                  ({detectionResults.total_cows} original)
-                </div>
-              )}
             </div>
           </div>
           <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-200">

@@ -72,15 +72,6 @@ export function ResultsSummary({
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Summary Row */}
-        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-          <span>
-            <span className="font-semibold text-foreground">{filteredSelectedCount}</span> selected
-            <span className="mx-1 text-muted-foreground">+</span>
-            <span className="font-semibold text-blue-600 dark:text-blue-400">{manualDetections?.length || 0} Manual</span>
-          </span>
-        </div>
-
         {/* Results Grid */}
         <div className="grid grid-cols-3 gap-3">
           <SummaryStat
@@ -89,7 +80,7 @@ export function ResultsSummary({
             className="bg-primary/10 border-primary/20 text-primary"
           />
           <SummaryStat
-            label="Selected"
+            label="Picked"
             value={filteredSelectedCount}
             className="bg-emerald-50 border-emerald-200 text-emerald-600"
           />
@@ -128,12 +119,12 @@ export function ResultsSummary({
         </div>
 
         {/* Controls */}
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 w-full">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowBoundingBoxes(!showBoundingBoxes)}
-            className="flex-1 text-xs text-foreground/90 hover:text-foreground"
+            className="w-full text-xs text-foreground/90 hover:text-foreground"
           >
             {showBoundingBoxes ? <EyeOff className="w-3 h-3 mr-1" /> : <Eye className="w-3 h-3 mr-1" />}
             {showBoundingBoxes ? "Hide" : "Show"} Boxes
@@ -145,14 +136,12 @@ export function ResultsSummary({
               e.stopPropagation()
               toggleManualDetectionMode()
             }}
-            className="flex-1 text-xs text-foreground/90 hover:text-foreground"
+            className="w-full text-xs text-foreground/90 hover:text-foreground"
           >
             {isManualDetectionMode ? <MousePointer className="w-3 h-3 mr-1" /> : <PenLine className="w-3 h-3 mr-1" />}
             {isManualDetectionMode ? "Cancel" : "Manual"}
           </Button>
         </div>
-
-        {/* Manual Detection Instructions */}
         {isManualDetectionMode && (
           <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
             <p className="font-medium text-sm text-blue-800 dark:text-blue-200">Manual Detection Mode</p>
@@ -162,14 +151,17 @@ export function ResultsSummary({
           </div>
         )}
 
+        {/* Separator Line */}
+        <hr className="my-4 border-muted" />
+
         {/* Selection Controls */}
-        <div className="flex gap-1 justify-end">
+        <div className="flex flex-row gap-2 w-full">
           <Button
             variant="outline"
             size="sm"
             onClick={selectAllDetections}
             disabled={filteredSelectedCount === filteredDetections.length}
-            className="text-xs px-2 bg-transparent text-foreground/90"
+            className="w-1/2 text-xs bg-transparent text-foreground/90"
           >
             All
           </Button>
@@ -178,7 +170,7 @@ export function ResultsSummary({
             size="sm"
             onClick={deselectAllDetections}
             disabled={filteredSelectedCount === 0}
-            className="text-xs px-2 bg-transparent text-foreground/90"
+            className="w-1/2 text-xs bg-transparent text-foreground/90"
           >
             None
           </Button>

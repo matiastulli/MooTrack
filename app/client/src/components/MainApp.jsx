@@ -387,7 +387,10 @@ export default function MainApp() {
                   key={tab.id}
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    if (tab.id === "upload_image") setUploadStatus(null);
+                  }}
                   className={cn(
                     "w-8 h-8 p-0 transition-all duration-200",
                     isActive 
@@ -417,6 +420,7 @@ export default function MainApp() {
                     uploadStatus={uploadStatus}
                     detectionResults={detectionResults}
                     resetAnalysis={resetAnalysis}
+                    goToResultsTab={() => setActiveTab("summary")}
                   />
                 )}
 

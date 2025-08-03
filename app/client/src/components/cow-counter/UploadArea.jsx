@@ -1,4 +1,5 @@
 import { AlertCircle, CheckCircle, RotateCcw, Upload } from "lucide-react"
+import { useEffect } from "react"
 import { cn } from "../../lib/utils"
 import { Alert, AlertDescription } from "../ui/Alert"
 import { Button } from "../ui/Button"
@@ -13,7 +14,14 @@ export function UploadArea({
   uploadStatus,
   detectionResults,
   resetAnalysis,
+  goToResultsTab,
 }) {
+  useEffect(() => {
+    if (uploadStatus && uploadStatus.type === "success" && goToResultsTab) {
+      goToResultsTab();
+    }
+  }, [uploadStatus, goToResultsTab]);
+
   return (
     <Card className="shadow-comfortable border-comfortable">
       <CardHeader className="pb-6">

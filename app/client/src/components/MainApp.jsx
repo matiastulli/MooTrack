@@ -197,12 +197,6 @@ export default function MainApp() {
     }
   }
 
-  const selectAllOriginalDetections = () => {
-    if (detectionResults?.detections) {
-      setSelectedDetections(new Set(detectionResults.detections.map((_, index) => index)))
-    }
-  }
-
   const deselectAllDetections = () => {
     setSelectedDetections(new Set())
   }

@@ -15,7 +15,6 @@ class DetectionResult(BaseModel):
 class AnalysisResponse(BaseModel):
     total_cows: int
     detections: List[DetectionResult]
-    image_path: str
     analysis_complete: bool
     message: str
     method: Optional[str] = "enhanced"

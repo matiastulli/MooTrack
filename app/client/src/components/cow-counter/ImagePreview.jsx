@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { Minus, Plus } from "lucide-react"
+import { Minus, Plus, RotateCcw } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Button } from "../ui/Button"
 import { Card, CardContent } from "../ui/Card"
@@ -80,6 +80,11 @@ export function ImagePreview({
     }
   }
 
+  const resetZoom = () => {
+    setScale(1)
+    setPosition({ x: 0, y: 0 })
+  }
+
   useEffect(() => {
     if (scale === 1) {
       setPosition({ x: 0, y: 0 })
@@ -156,6 +161,16 @@ export function ImagePreview({
               disabled={scale === 4}
             >
               <Plus className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-7 h-7 dark:text-white"
+              onClick={resetZoom}
+              disabled={scale === 1 && position.x === 0 && position.y === 0}
+              title="Reset Zoom"
+            >
+              <RotateCcw className="h-4 w-4" />
             </Button>
           </div>
 

@@ -34,7 +34,6 @@ def detect_cows_enhanced(image_path: Path) -> Dict[str, Any]:
         return {
             "total_cows": count,
             "detections": formatted_detections,
-            "image_path": str(image_path),
             "analysis_complete": True,
             "message": f"Enhanced detection found {count} cows",
             "method": "enhanced"
@@ -44,7 +43,6 @@ def detect_cows_enhanced(image_path: Path) -> Dict[str, Any]:
         return {
             "total_cows": 0,
             "detections": [],
-            "image_path": str(image_path),
             "analysis_complete": False,
             "message": f"Enhanced detection failed: {str(e)}",
             "method": "enhanced"

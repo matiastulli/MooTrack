@@ -16,7 +16,7 @@ from .service import (
 )
 
 # Import configuration
-from ..config import IMAGES_DIR, OUTPUT_DIR
+from ..config import IMAGES_DIR
 
 router = APIRouter()
 
@@ -53,12 +53,6 @@ async def detect_cows_from_file(
 
     try:
         file_path = IMAGES_DIR / file_name
-
-        # Create output directory named after the filename without extension
-        # Get filename without extension
-        filename_stem = file_name.rsplit('.', 1)[0]
-        output_directory = OUTPUT_DIR / filename_stem
-        output_directory.mkdir(exist_ok=True)  # Ensure the directory exists
 
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="Image file not found")

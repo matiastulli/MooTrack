@@ -29,8 +29,6 @@ ALLOWED_EXTENSIONS = os.getenv("ALLOWED_EXTENSIONS", ".jpg,.jpeg,.png").split(",
 # Directory Configuration
 BASE_DIR = Path(__file__).parent
 IMAGES_DIR = BASE_DIR / "cow_counter/images"
-OUTPUT_DIR = BASE_DIR / "cow_counter/output"
-UPLOADS_DIR = BASE_DIR / "cow_counter/uploads"
 
 # CORS Configuration
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
@@ -62,8 +60,7 @@ def get_config_summary():
         "files": {
             "max_file_size_mb": MAX_FILE_SIZE // (1024 * 1024),
             "allowed_extensions": ALLOWED_EXTENSIONS,
-            "images_dir": str(IMAGES_DIR),
-            "output_dir": str(OUTPUT_DIR)
+            "images_dir": str(IMAGES_DIR)
         },
         "cors": {
             "allowed_origins": CORS_ORIGINS

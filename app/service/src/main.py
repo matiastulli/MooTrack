@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 # Import configuration
 from src.config import (
     API_TITLE, API_DESCRIPTION, API_VERSION,
-    CORS_ORIGINS, IMAGES_DIR, OUTPUT_DIR,
+    CORS_ORIGINS, IMAGES_DIR,
     get_config_summary
 )
 
@@ -35,13 +35,10 @@ app.add_middleware(
 
 # Create directories
 IMAGES_DIR.mkdir(exist_ok=True)
-OUTPUT_DIR.mkdir(exist_ok=True)
 
 # Mount static files
 if IMAGES_DIR.exists():
     app.mount("/images", StaticFiles(directory=str(IMAGES_DIR)), name="images")
-if OUTPUT_DIR.exists():
-    app.mount("/output", StaticFiles(directory=str(OUTPUT_DIR)), name="output")
 
 # Include the cow detection router
 app.include_router(cow_router, prefix="/cow-counter", tags=["cow-counter"])
